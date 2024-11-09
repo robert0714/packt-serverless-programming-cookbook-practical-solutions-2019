@@ -1,82 +1,99 @@
 package tech.heartin.books.serverlesscookbook.services;
 
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
-import com.amazonaws.services.identitymanagement.model.CreateUserRequest;
-import com.amazonaws.services.identitymanagement.model.CreateUserResult;
-import com.amazonaws.services.identitymanagement.model.DeleteConflictException;
-import com.amazonaws.services.identitymanagement.model.DeleteUserRequest;
-import com.amazonaws.services.identitymanagement.model.ListUsersRequest;
-import com.amazonaws.services.identitymanagement.model.ListUsersResult;
-import com.amazonaws.services.identitymanagement.model.User;
-
+import software.amazon.awssdk.services.iam.IamClient;
+import software.amazon.awssdk.services.iam.model.*;
 import lombok.AllArgsConstructor;
-
 import tech.heartin.books.serverlesscookbook.domain.IAMOperationResponse;
 
 /**
- * Implementation of {@link IAMService}.
+ * Implementation of {@link IAMService} using AWS SDK v2.
  */
 @AllArgsConstructor
 public class IAMServiceImpl implements IAMService {
 
-    private final AmazonIdentityManagement iamClient;
+    private final IamClient iamClient;
 
     public IAMServiceImpl() {
-        this.iamClient = AmazonIdentityManagementClientBuilder.defaultClient();
-    }
+        this.iamClient = IamClient.builder()
+                .build();
+    } 
 
     @Override
     public final IAMOperationResponse createUser(final String userName) {
+        try {
+            CreateUserRequest request = CreateUserRequest.builder()
+                    .userName(userName)
+                    .build();
 
-        CreateUserRequest request =
-                new CreateUserRequest().withUserName(userName);
+            CreateUserResponse response = iamClient.createUser(request);
 
-        CreateUserResult response = iamClient.createUser(request);
-
-        return new IAMOperationResponse(
-                "Created user " + response.getUser().getUserName(),
-                null);
+            return new IAMOperationResponse(
+                    "Created user " + response.user().userName(),
+                    null);
+        } catch (IamException e) {
+            return new IAMOperationResponse(
+                    null,
+                    "Failed to create user: " + e.getMessage());
+        }
     }
 
     @Override
     public final IAMOperationResponse checkUser(final String userName) {
-        boolean done = false;
-        ListUsersRequest request = new ListUsersRequest();
+        try {
+            ListUsersRequest request = ListUsersRequest.builder().build();
+            ListUsersResponse response;
+            boolean found = false;
 
-        while (!done) {
-            ListUsersResult response = iamClient.listUsers(request);
+            do {
+                response = iamClient.listUsers(request);
 
-            for (User user : response.getUsers()) {
-                if (user.getUserName().equals(userName)) {
-                    return new IAMOperationResponse("User " + userName + " exist", null);
+                for (User user : response.users()) {
+                    if (user.userName().equals(userName)) {
+                        found = true;
+                        return new IAMOperationResponse("User " + userName + " exists", null);
+                    }
                 }
-            }
 
-            request.setMarker(response.getMarker());
+                if (response.isTruncated()) {
+                    request = ListUsersRequest.builder()
+                            .marker(response.marker())
+                            .build();
+                }
 
-            if (!response.getIsTruncated()) {
-                done = true;
+            } while (response.isTruncated());
+
+            if (!found) {
+                return new IAMOperationResponse(null, "User " + userName + " does not exist");
             }
+        } catch (IamException e) {
+            return new IAMOperationResponse(
+                    null,
+                    "Failed to check user: " + e.getMessage());
         }
-        return new IAMOperationResponse(null, "User " + userName + " does not exist");
+        
+        return new IAMOperationResponse(null, "Error checking user");
     }
 
     @Override
     public final IAMOperationResponse deleteUser(final String userName) {
-        DeleteUserRequest request = new DeleteUserRequest()
-                .withUserName(userName);
-
         try {
+            DeleteUserRequest request = DeleteUserRequest.builder()
+                    .userName(userName)
+                    .build();
+
             iamClient.deleteUser(request);
+
+            return new IAMOperationResponse(
+                    "Deleted user " + userName,
+                    null);
         } catch (DeleteConflictException e) {
-            return new IAMOperationResponse(null,
-                    "Unable to delete user");
+            return new IAMOperationResponse(
+                    null,
+                    "Unable to delete user: " + e.getMessage());
+        } catch (IamException e) {
+            return new IAMOperationResponse(
+                    null,
+                    "Failed to delete user: " + e.getMessage());
         }
-
-        return new IAMOperationResponse(
-                "Deleted user " + userName,
-                null);
     }
-
 }

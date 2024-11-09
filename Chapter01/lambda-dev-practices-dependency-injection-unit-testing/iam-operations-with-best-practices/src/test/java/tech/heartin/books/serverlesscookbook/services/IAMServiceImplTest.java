@@ -1,32 +1,37 @@
 package tech.heartin.books.serverlesscookbook.services;
 
 import java.util.Objects;
+import java.util.ArrayList;
 
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
-import com.amazonaws.services.identitymanagement.model.CreateUserResult;
-import com.amazonaws.services.identitymanagement.model.DeleteUserResult;
-import com.amazonaws.services.identitymanagement.model.ListUsersResult;
-import com.amazonaws.services.identitymanagement.model.User;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import software.amazon.awssdk.services.iam.IamClient;
+import software.amazon.awssdk.services.iam.model.CreateUserRequest;
+import software.amazon.awssdk.services.iam.model.CreateUserResponse;
+import software.amazon.awssdk.services.iam.model.DeleteUserRequest;
+import software.amazon.awssdk.services.iam.model.DeleteUserResponse;
+import software.amazon.awssdk.services.iam.model.ListUsersRequest;
+import software.amazon.awssdk.services.iam.model.ListUsersResponse;
+import software.amazon.awssdk.services.iam.model.User;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import tech.heartin.books.serverlesscookbook.domain.IAMOperationResponse;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class IAMServiceImplTest {
 
     @Mock
-    private AmazonIdentityManagement iamClient;
+    private IamClient iamClient;
 
     private IAMService service;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         service = new IAMServiceImpl(iamClient);
         Objects.requireNonNull(service);
@@ -34,41 +39,59 @@ public class IAMServiceImplTest {
 
     @Test
     public void testCreateUser() {
+        String testUser = "test_user";
         IAMOperationResponse expectedResponse = new IAMOperationResponse(
                 "Created user test_user", null);
-        when(iamClient.createUser(any()))
-                .thenReturn(new CreateUserResult()
-                        .withUser(new User().withUserName("test_user")));
-        IAMOperationResponse actualResponse
-                = service.createUser("test_user");
-        Assert.assertEquals(expectedResponse, actualResponse);
+
+        User user = User.builder()
+                .userName(testUser)
+                .build();
+
+        CreateUserResponse createUserResponse = CreateUserResponse.builder()
+                .user(user)
+                .build();
+
+        when(iamClient.createUser(any(CreateUserRequest.class)))
+                .thenReturn(createUserResponse);
+        
+        IAMOperationResponse actualResponse = service.createUser(testUser);
+        
+        assertEquals(expectedResponse, actualResponse);
     }
 
     @Test
     public void testCheckUser() {
+        String testUser = "test_user";
         IAMOperationResponse expectedResponse = new IAMOperationResponse(
                 "User test_user exist", null);
-        when(iamClient.listUsers(any()))
-                .thenReturn(getListUsersResult());
-        IAMOperationResponse actualResponse
-                = service.checkUser("test_user");
-        Assert.assertEquals(expectedResponse, actualResponse);
-    }
 
-    private ListUsersResult getListUsersResult() {
-        ListUsersResult result = new ListUsersResult();
-        result.getUsers().add(new User().withUserName("test_user"));
-        return result;
+        ListUsersResponse listUsersResponse = ListUsersResponse.builder()
+                .users(User.builder()
+                        .userName(testUser)
+                        .build())
+                .build();
+
+        when(iamClient.listUsers(any(ListUsersRequest.class)))
+                .thenReturn(listUsersResponse);
+        
+        IAMOperationResponse actualResponse = service.checkUser(testUser);
+        
+        assertEquals(expectedResponse, actualResponse);
     }
 
     @Test
     public void testDeleteUser() {
+        String testUser = "test_user";
         IAMOperationResponse expectedResponse = new IAMOperationResponse(
                 "Deleted user test_user", null);
-        when(iamClient.deleteUser(any()))
-                .thenReturn(new DeleteUserResult());
-        IAMOperationResponse actualResponse
-                = service.deleteUser("test_user");
-        Assert.assertEquals(expectedResponse, actualResponse);
+
+        DeleteUserResponse deleteUserResponse = DeleteUserResponse.builder().build();
+
+        when(iamClient.deleteUser(any(DeleteUserRequest.class)))
+                .thenReturn(deleteUserResponse);
+        
+        IAMOperationResponse actualResponse = service.deleteUser(testUser);
+        
+        assertEquals(expectedResponse, actualResponse);
     }
 }

@@ -1,13 +1,14 @@
 package tech.heartin.books.serverlesscookbook;
 
 import java.util.Objects;
-
-import javax.inject.Inject;
+ 
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import jakarta.inject.Inject;
 import tech.heartin.books.serverlesscookbook.domain.IAMOperationRequest;
 import tech.heartin.books.serverlesscookbook.domain.IAMOperationResponse;
 import tech.heartin.books.serverlesscookbook.guice.ApplicationModule;
