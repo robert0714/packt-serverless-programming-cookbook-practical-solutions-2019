@@ -57,7 +57,7 @@ Replace the <bucket name> with your bucket's name. Remember that the S3 bucket n
    ```bash
    aws lambda create-function \
    --function-name demo-lambda-with-cli \
-   --runtime java8 \
+   --runtime java17 \
    --role arn:aws:iam::<account_id>:role/lambda_iam_role_test \
    --handler tech.heartin.books.serverlesscookbook.MyLambdaHandler::handleRequest \
    --code S3Bucket=serverless-cookbook,S3Key=lambda-handler-with-pojos-0.0.1-SNAPSHOT.jar \
@@ -73,7 +73,7 @@ Replace the <bucket name> with your bucket's name. Remember that the S3 bucket n
    --invocation-type RequestResponse \
    --function-name demo-lambda-with-cli \
    --log-type Tail \
-   --cli-binary-format raw-in-base64-out
+   --cli-binary-format raw-in-base64-out \
    --payload '{"name":"Heartin"}' \
    --profile admin \
    outputfile.txt
