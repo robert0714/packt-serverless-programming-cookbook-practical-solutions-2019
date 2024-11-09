@@ -9,19 +9,33 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <parent>
-        <groupId>tech.heartin.starters</groupId>
-        <artifactId>simple-starter-parent-java</artifactId>
-        <version>1.0.1</version>
-    </parent>
-
     <properties>
-        <aws.sdk.version>1.11.470</aws.sdk.version>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>         
+        <lombok.version>1.18.34</lombok.version>
+        <junit.version>4.13.2</junit.version>
+        <mockito.version>2.23.4</mockito.version>
+        <checkstyle.version>3.0.0</checkstyle.version>
+        <maven.shade.plugin.version>3.2.1</maven.shade.plugin.version>
+        <simple.starter.build.tools.version>1.0.0</simple.starter.build.tools.version>
+        <build.tools.location>${project.build.directory}/buildtools</build.tools.location>
+        <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
+        <maven.source.plugin.version>3.0.1</maven.source.plugin.version>
+        <maven.javadoc.plugin.version>3.0.1</maven.javadoc.plugin.version>
+        <maven.gpg.plugin.version>1.6</maven.gpg.plugin.version>
+        <aws.sdk.version>1.12.777</aws.sdk.version>
+        <!-- <aws.sdk.version>2.28.26</aws.sdk.version> -->
+        <testcontainers.version>1.20.3</testcontainers.version> 
+        <junit-jupiter.version>5.11.3</junit-jupiter.version>  
         <aws.lambda.java.core.version>1.2.0</aws.lambda.java.core.version>
         <aws.lambda.java.events.version>2.2.4</aws.lambda.java.events.version>
         <ask.sdk.version>2.11.2</ask.sdk.version>
         <aws.lambda.java.log4j2>1.1.0</aws.lambda.java.log4j2>
     </properties>
+ 
 
     <!-- Sample dependency declarations. -->
     <!-- NEVER declare aws-java-sdk for a Lambda. Instead use specific ones you need (e.g. aws-java-sdk-iam). -->
@@ -63,5 +77,151 @@
 
     </dependencies>
     -->
+    <dependencies>
 
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+    <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk-bom</artifactId>
+        <version>1.12.777</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-lambda-java-events</artifactId>
+        <version>2.2.6</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.17.2</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.shade.plugin.version}</version>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Added to share build artifacts. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-buildtools</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>tech.heartin.starters</groupId>
+                                    <artifactId>simple-starter-build-tools</artifactId>
+                                    <version>${simple.starter.build.tools.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/buildtools</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Added to keep some check on code style. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle.version}</version>
+                <executions>
+                    <execution>
+                        <id>checkstyle</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <!-- sun_checks.xml is the default and hence no need to explicitly mention. -->
+                            <configLocation>${build.tools.location}/checkstyle/checkstyle.xml</configLocation>
+                            <suppressionsLocation>${build.tools.location}/checkstyle/suppressions.xml</suppressionsLocation>
+                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <!-- Used failOnViolation to log errors on console -->
+                            <!-- See https://maven.apache.org/plugins/maven-checkstyle-plugin/check-mojo.html -->
+                            <failOnViolation>true</failOnViolation>
+                            <violationSeverity>error</violationSeverity>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle.version}</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>checkstyle</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>

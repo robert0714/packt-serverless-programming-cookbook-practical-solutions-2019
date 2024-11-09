@@ -3,11 +3,11 @@
 
 # Serverless Programming Cookbook
 
-<a href="https://www.packtpub.com/application-development/serverless-programming-cookbook?utm_source=github&utm_medium=repository&utm_campaign=9781788623797 "><img src="https://d255esdrn735hr.cloudfront.net/sites/default/files/imagecache/ppv4_main_book_cover/9781788623797-%20Copy.png" alt="Serverless Programming Cookbook" height="256px" align="right"></a>
+<a href="https://www.packtpub.com/application-development/serverless-programming-cookbook?utm_source=github&utm_medium=repository&utm_campaign=9781788623797 "><img src="71tJjPcqdAL._SL1360_.jpg" alt="Serverless Programming Cookbook" height="256px" align="right"></a>
 
 This is the code repository for [Serverless Programming Cookbook](https://www.packtpub.com/application-development/serverless-programming-cookbook?utm_source=github&utm_medium=repository&utm_campaign=9781788623797 ), published by Packt.
 
-**Practical solutions to building serverless applications using Java and AWS	**
+**Practical solutions to building serverless applications using Java and AWS**
 
 ## What is this book about?
 <span class="sugar_field" id="description">Managing physical servers will be a thing of the past once you’re able to harness the power of serverless computing. If you’re already prepped with the basics of serverless computing, Serverless Programming Cookbook will help you take the next step ahead. This recipe-based guide provides solutions to problems you might face while building serverless applications. </span>
