@@ -7,7 +7,7 @@ You can set up the parent project inside our parent folder (serverless in my cas
    git clone https://github.com/PacktPublishing/Serverless-Programming-Cookbook.git
    ```
 2. Go inside the repository folder, go inside our project-specific parent project, and run mvn clean install:
-   ``bash
+   ```bash
    cd Serverless-Programming-Cookbook
    cd serverless-cookbook-parent-aws-java
    mvn clean install
