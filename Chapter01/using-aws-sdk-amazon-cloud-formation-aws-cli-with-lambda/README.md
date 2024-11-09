@@ -10,7 +10,7 @@ AWS SDK allows you to write code that interacts with AWS services. In this recip
 
 1. Upload the JAR to S3:
    ```bash
-    aws s3 cp target/serverless-cookbook-iam-operations-0.0.1-SNAPSHOT.jar s3://serverless-cookbook/iam-operations-0.0.1-SNAPSHOT.jar --profile admin
+    aws s3 cp target/iam-operations-0.0.1-SNAPSHOT.jar s3://dev-for-tw-robert-20241020/ --profile admin
    ``` 
 1. Create a CloudFormation template for our lambda function.
    * You need to create a role with a trust policy that allows our Lambda to assume the role. You also need to create a policy with CloudFormation and IAM permissions. 

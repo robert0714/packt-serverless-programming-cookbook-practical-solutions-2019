@@ -1,26 +1,25 @@
 package tech.heartin.books.serverlesscookbook.services;
 
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
-import com.amazonaws.services.identitymanagement.model.CreateUserRequest;
-import com.amazonaws.services.identitymanagement.model.CreateUserResult;
-import com.amazonaws.services.identitymanagement.model.DeleteConflictException;
-import com.amazonaws.services.identitymanagement.model.DeleteUserRequest;
-import com.amazonaws.services.identitymanagement.model.ListUsersRequest;
-import com.amazonaws.services.identitymanagement.model.ListUsersResult;
-import com.amazonaws.services.identitymanagement.model.User;
-
+import software.amazon.awssdk.services.iam.IamClient;
+import software.amazon.awssdk.services.iam.model.CreateUserRequest;
+import software.amazon.awssdk.services.iam.model.CreateUserResponse;
+import software.amazon.awssdk.services.iam.model.DeleteConflictException;
+import software.amazon.awssdk.services.iam.model.DeleteUserRequest;
+import software.amazon.awssdk.services.iam.model.ListUsersRequest;
+import software.amazon.awssdk.services.iam.model.ListUsersResponse;
+import software.amazon.awssdk.services.iam.model.User;
 import tech.heartin.books.serverlesscookbook.domain.IAMOperationResponse;
 
 /**
- * Service class for IAM operations.
+ * Service class for IAM operations using AWS SDK v2.
  */
 public class IAMService {
 
-    private final AmazonIdentityManagement iamClient;
+    private final IamClient iamClient;
 
     public IAMService() {
-        iamClient = AmazonIdentityManagementClientBuilder.defaultClient();
+        this.iamClient = IamClient.builder()
+                .build();
     }
 
     /**
@@ -29,14 +28,14 @@ public class IAMService {
      * @return IAMOperationResponse
      */
     public final IAMOperationResponse createUser(final String userName) {
+        CreateUserRequest request = CreateUserRequest.builder()
+                .userName(userName)
+                .build();
 
-        CreateUserRequest request =
-                new CreateUserRequest().withUserName(userName);
-
-        CreateUserResult response = iamClient.createUser(request);
+        CreateUserResponse response = iamClient.createUser(request);
 
         return new IAMOperationResponse(
-                "Created user " + response.getUser().getUserName(),
+                "Created user " + response.user().userName(),
                 null);
     }
 
@@ -46,22 +45,27 @@ public class IAMService {
      * @return IAMOperationResponse
      */
     public final IAMOperationResponse checkUser(final String userName) {
+        String marker = null;
         boolean done = false;
-        ListUsersRequest request = new ListUsersRequest();
 
         while (!done) {
-            ListUsersResult response = iamClient.listUsers(request);
+            ListUsersRequest.Builder requestBuilder = ListUsersRequest.builder();
+            if (marker != null) {
+                requestBuilder.marker(marker);
+            }
 
-            for (User user : response.getUsers()) {
-                if (user.getUserName().equals(userName)) {
+            ListUsersResponse response = iamClient.listUsers(requestBuilder.build());
+
+            for (User user : response.users()) {
+                if (user.userName().equals(userName)) {
                     return new IAMOperationResponse("User " + userName + " exist", null);
                 }
             }
 
-            request.setMarker(response.getMarker());
-
-            if (!response.getIsTruncated()) {
+            if (!response.isTruncated()) {
                 done = true;
+            } else {
+                marker = response.marker();
             }
         }
         return new IAMOperationResponse(null, "User " + userName + " does not exist");
@@ -73,8 +77,9 @@ public class IAMService {
      * @return IAMOperationResponse
      */
     public final IAMOperationResponse deleteUser(final String userName) {
-        DeleteUserRequest request = new DeleteUserRequest()
-                .withUserName(userName);
+        DeleteUserRequest request = DeleteUserRequest.builder()
+                .userName(userName)
+                .build();
 
         try {
             iamClient.deleteUser(request);
@@ -87,5 +92,4 @@ public class IAMService {
                 "Deleted user " + userName,
                 null);
     }
-
 }
