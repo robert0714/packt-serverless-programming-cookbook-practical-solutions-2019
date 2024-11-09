@@ -38,7 +38,7 @@ Resources:
 
       Role: !GetAtt IamRoleLambdaExecution.Arn
 
-      Runtime: java8
+      Runtime: java17
       Timeout: 15
     DependsOn:
       - IamRoleLambdaExecution
