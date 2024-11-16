@@ -2,12 +2,12 @@
 ## This chapter will cover the following topics:
 
 * [Building your first API using the AWS CLI](./your-first-api-using-aws-cli/README.md)
-* Building your first API using Amazon CloudFormation
-* Building your first API with Lambda integration
-* Building and testing your first POST API method
-* Mapping requests and responses using mapping templates
-* Validating request payloads with models
-* Using Lambda and APIs with proxy integration
+* [Building your first API using Amazon CloudFormation](./your-first-api-using-cloud-formation/README.md)
+* [Building your first API with Lambda integration](./your-first-api-with-lambda-integration/README.md)
+* [Building and testing your first POST API method](./building-and-testing-your-first-post-api-method/README.md)
+* [Mapping requests and responses using mapping templates](./mapping-requests-and-responses-using-mapping-templates/)
+* [Validating request payloads with models](./validating-input-and-output-with-models/README.md)
+* [Using Lambda and APIs with proxy integration](./api-with-lambda-proxy-integration/README.md)
 
 ## Introduction
 An application programming interface (API) is a set of methods that allow us to programmatically access a component. APIs can be built for different layers, such as the web (http/rest), database, and operating system layers, and so on. A representational state transfer (REST) API is an API that uses REST principles and HTTP protocol to build web APIs that can be programmatically consumed by clients over a network, such as the internet. 
