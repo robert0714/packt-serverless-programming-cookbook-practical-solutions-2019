@@ -13,7 +13,7 @@ Upload the Lambda to our S3 bucket with the `aws s3 cp` command. Then, use the C
 ## Creating the Proxy API with CLI commands
 First, let's create the REST API by using AWS CLI commands. We will not show how to use the commands that we already discussed in previous recipes. However, the complete commands will be available in the code files:
 1. Create a REST API in API Gateway, using the `apigateway` sub-command `create-rest-api`.
-2. et the root resource (/) of our API, using the `apigateway` sub-command `get-resources`.
+2. Get the root resource (/) of our API, using the `apigateway` sub-command `get-resources`.
 3. Add a greedy path param, `'{proxy+}'`, for the proxy resource:
    ```bash
    aws apigateway create-resource \
@@ -84,7 +84,7 @@ First, let's create the REST API by using AWS CLI commands. We will not show how
     {
       "message": "Good Morning, Heartin. Welcome to MyApp. (Client User-Agent is Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36."
     }
-   ```
+    ```
     I sent a `POST` request from the Postman client, but a GET request from a browser will also work in this case, as the API's proxy resource has an ANY method, which can accept any HTTP method. Also, remember to replace the IDs with your own.
 
 ## Creating the API using CloudFormation templates
