@@ -2,7 +2,7 @@
 This chapter will cover the following topics:
 
 * [Your first DynamoDB table](./your-first-dynamodb-table/README.md)
-* Throughput provisioning examples
+* [Throughput provisioning examples](./Throughput-provisioning-examples/README.md)
 * [Working with data from the CLI](./working-with-data-from-cli/)
 * Using the DynamoDB SDK from Lambda
 * [Creating tables from Lambda](./creating-tables-from-lambda/)
