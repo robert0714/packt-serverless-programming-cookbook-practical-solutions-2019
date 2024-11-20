@@ -3,7 +3,7 @@ This chapter will cover the following topics:
 * [Creating a Cognito user pool](./creating-a-cognito-user-pool/README.md) (AWS CLI, CloudFormation)
 * [Server-side authentication flow](./cognito-server-side-authentication-flow/README.md) (AWS CLI, CloudFormation)
 * [Client-side authentication flow](./cognito-client-side-authentication-flow/README.md) (AWS CLI, CloudFormation)
-* [User sign-up flow with Cognito](./user-sign-up-flow-with-cognito/) (AWS CLI)
+* [User sign-up flow with Cognito](./user-sign-up-flow-with-cognito/README.md) (AWS CLI)
 * [Working with groups](./working-with-groups/) (AWS CLI)
 * [Integrating Cognito in an API gateway](./integrating-cognito-with-api-gateway/) (AWS CLI, CloudFormation)
 * [User sign-up with SMS verification and MFA](./user-sign-up-with-sms-and-mfa-verification/) (AWS CLI, CloudFormation)
