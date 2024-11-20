@@ -5,7 +5,7 @@ This chapter will cover the following topics:
 * [Client-side authentication flow](./cognito-client-side-authentication-flow/README.md) (AWS CLI, CloudFormation)
 * [User sign-up flow with Cognito](./user-sign-up-flow-with-cognito/README.md) (AWS CLI)
 * [Working with groups](./working-with-groups/README.md) (AWS CLI)
-* [Integrating Cognito in an API gateway](./integrating-cognito-with-api-gateway/) (AWS CLI, CloudFormation)
+* [Integrating Cognito in an API gateway](./integrating-cognito-with-api-gateway/README.md) (AWS CLI, CloudFormation)
 * [User sign-up with SMS verification and MFA](./user-sign-up-with-sms-and-mfa-verification/) (AWS CLI, CloudFormation)
 
 ## Introduction
