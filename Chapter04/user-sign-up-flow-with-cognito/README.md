@@ -17,7 +17,7 @@ The following steps describe how to set up user sign-up with self-confirmation:
 1. Use the `sign-up` sub-command to initiate the sign-up flow, providing your `username` and `password`:
     ```bash
     aws cognito-idp sign-up \
-        --client-id 4s69op0v8es2cojl5ncjql2v4g \
+        --client-id 1vbdpbk913s51irajrvctql7nu \
         --username testuser4 \
         --password Passw0rd$ \
         --user-attributes Name=email,Value=testemail@heartin.tech
@@ -29,20 +29,20 @@ The following steps describe how to set up user sign-up with self-confirmation:
     {
         "UserConfirmed": false,
         "CodeDeliveryDetails": {
-            "Destination": "+********4114",
-            "DeliveryMedium": "SMS",
-            "AttributeName": "phone_number"
+            "Destination": "r***@g***",
+            "DeliveryMedium": "EMAIL",
+            "AttributeName": "email"
         },
-        "UserSub": "f8f7f918-23dc-43da-a88b-4a7364c78072"
+        "UserSub": "67c4eaa8-2091-70f9-f1e9-ff5016015172"
     }
     ```
     You will also receive an email with the confirmation code, as shown in the following screenshot:
-
+    ![img](./resources/dc191f7d-13f9-4003-9bd8-2235c9a3a46f.png)
     > The preceding message format was configured while creating the user pool. You can also use the email configuration section in the input CLI JSON, or within the CloudFormation template, to make additional customizations, such as a reply email address.
 2. Confirm the user sign-up with the code received, as follows:
     ```bash
     aws cognito-idp confirm-sign-up \
-    --client-id 4s69op0v8es2cojl5ncjql2v4g \
+    --client-id 1vbdpbk913s51irajrvctql7nu \
     --username testuser4 \
     --confirmation-code 156202
     ```
@@ -50,20 +50,20 @@ The following steps describe how to set up user sign-up with self-confirmation:
 3. Now, try to sign-in with your username and password, as follows:
     ```bash
     aws cognito-idp initiate-auth \
-        --client-id 4s69op0v8es2cojl5ncjql2v4g \
+        --client-id 1vbdpbk913s51irajrvctql7nu \
         --auth-flow USER_PASSWORD_AUTH \
         --auth-parameters USERNAME=testuser4,PASSWORD=Passw0rd$
     ```
     If it is successful, you will get a response with the `AccessToken`, `RefreshToken`, and `IdToken`:
-    ```json
+    ```json 
     {
-    "ChallengeParameters": {},
-    "AuthenticationResult": {
-        "AccessToken": "eyJraWQiOiI0VTY1ZHNqWlgyRHZoUDNwVFhnaTVkNU4zNkhmUkd00FFVZHFvd1pmTXVnPSIsImFsZyIjA2MGMyMGRkLWVjZjktMTFl0C040Tg1LWNkMzIwOGIxODA5NSIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ2aXRvLWlkcC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0xX2ZZc2IxR3llYyIsImV4cCI6MTU0MjCONTA5MiwiaWF0IjOiI1aGg0djdudmV1MjJ2ZWE3NGg4c3R00TIzOCIsInVzZXJuYW1lIjoidGVzdHVzZXIifQ.Eg3Z1kAJyJ-NEXmWmbavMV325_Uh-UTecuFeXtYLKHjc_rD7gj8vp50NfDQN5m_u8fP8Q8JRFTsLPaGR6C3qX6u0F_HR6BN_YWpHYtBudsShz2qGlryxcvqSzfpzbws8rMli5xZNIxmwna0c0CycbED8buKQ49Mj_g",
-        "ExpiresIn": 3600,
-        "TokenType": "Bearer",
-        "RefreshToken": "eyJjdHki0iJKV1QiLCJlbmMi0iJBMjU2RONNIiwiYWxnIjoiUlSBLU9BRVAifQ.BnFlQ7rap5v7g4aapMvMJPUejJIwTkqnPpAYjRNJsECnIlKgVYa8gmfkVLmPaGT8p2NmuIicHDZoPhY60VwAHrtVBWzq9xXX4g-k4PKIerEaMK4vZGMcLlMHcUNex7usnE0xvu0ryXrSniWAi3Sq940xjfEFgpfM2g.4WtMGmzXd8KEzU1P.g7zcSVH6RXguLWAeTa0ALcJghunwYB7Z5gSAEfbdCTXsWaAfddTlNyGweh0e6S34q4t4egQtgTZWjcUdBuCRkvcCUU_V3YC38SxENfNmxw9AzVfRg7PQKM4M5Pt2vU-CZx8Hklat31fojErd-3YBOLzgYIq8_0qMNhVWoeJCA3AjsB0vQ2R7z_qyaTXqbQBBpR0QfjaQD0psT404xRJ_Blqxs_PEm2Ego7mXsjo6SoILgVRX5q gZ0KjqXci91M-65MJB7HbLOUXYouOYPLazE_J3P0npEEAUUc9hx2RCHbfh8EUyPFiHv890mNukhcuyfNlh5N8EPLyy5Gmxf8MGgfe0jqPtnA4J5f380vD5mXF2Dx_iF1-1MNdcZnQzUG-1Z0yG9rTchnrPIk6JLMCXhUQFu9791plCSKRf1oLiZTSg0e0PB_h2lGTJaU2ULEklYj6qpxKaryd-ysY7C1YDPf-ee_w0-MN5maUjwXuzpKrboiwEBsjfrGSnwd4M58GHHQtqUZMUbVQn6hoVElyYNvhgXdXByuVTxGKmHdmBu28hbuhYt7Y1h409AqhBWAhqUFez2BqBeGYT_tsv3FELK1-s7qPrNvkwLQYPaXDooLgKNVMqjnVbpIsbLU4DW4nAHLWNx9d165saUwcaMUuw.Wa_lkFBRerl1zeoKjE32XA",
-        "IdToken": "eyJraWQi0iJlVWh6bWYzR28wNDcrVW01b3dybDdReHZuamdvYjFlbk9ZV3NnV1FvZEc0PSIsImFsZyI6I1dmV1MjJ2ZWE3NGg4c3R00TIzOCIsImV2ZW50X2lkIjoiMDYwYzIwZGQtZWNm0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA"
+        "ChallengeParameters": {},
+        "AuthenticationResult": {
+            "AccessToken": "eyJraWQiOiJvbjJMb2FxeGhhbTlSTUhGXC84R01cLytOQU9JdWt6SGI1RStRVnFoeHFLb3c9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiI2N2M0ZWFhOC0yMDkxLTcwZjktZjFlOS1mZjUwMTYwMTUxNzIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtbm9ydGhlYXN0LTEuYW1hem9uYXdzLmNvbVwvYXAtbm9ydGhlYXN0LTFfTmJEZklrUHhtIiwiY2xpZW50X2lkIjoiMXZiZHBiazkxM3M1MWlyYWpydmN0cWw3bnUiLCJvcmlnaW5fanRpIjoiNjU4NGJiNjAtODllZi00M2Q4LTk3YjktNTQ2MjM2MDg0NWJjIiwiZXZlbnRfaWQiOiIyMTY0YjRkYS0yNWJiLTRhMTYtYWFmOS0wOWE0OTllMjA0YmUiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzMyMjY2MDcwLCJleHAiOjE3MzIyNjk2NzAsImlhdCI6MTczMjI2NjA3MCwianRpIjoiZThlYmM4ZjgtNTYyYi00YTk0LWI1NDUtNzYwMzAyN2IwMWU5IiwidXNlcm5hbWUiOiJ0ZXN0dXNlcjQifQ.uUGBCIoAxWb-_bRi8_2LLxSFZAntwKTigqj_PYQutPy-yy0Z8MHUp3jSkz6ndiyfK9dHW6WyyOaPx4KDdZfOd5HgS14bXcJOK_pFzvTaX5U6H5dCRi6wc-bunmpYVVDk1V7S4oU4LQBvJ41Av_bRBCmWRmNslDjTUmMiwqRSsKu1ZUojDAghMsBa6Mi1Z7prv5wL0w6uNmbUgam-aUpsyRiT4oIk9CHQ55829-CcVTO9BHDBU2hcppoBEjTvmfy8kU_3rmSzoivWs8fFJ013vuOeK5-2Y7UUrGs1w-PS3qiN8MshEB-jNI7wp4jAanLSg3l5UTHrLPtWJZfiDOm2pA",
+            "ExpiresIn": 3600,
+            "TokenType": "Bearer",
+            "RefreshToken": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.Saj8OXMh9aE645g8FHPkeG89hiemWV4IpEg5BhL7fzijVZllA4_owGVoTtHmxWA5oQGdjegvk8EmmOga3Yo_u7moXT0xXeLKVUldSa0M_uARyoH60Y6K2NiedWxOfHqjWHpwluCmSO8i3rjC-4pReLYAFVeaQvSkfPWi9WVqQWGoe8obF8VGA0F609gwPMnSLStlZjqXRBuHDMt14Q8GxMv3xU2esB4ISfgzoGpfBgUhkHdKBirCYKM0gLc7FH12p5O0HmnGflj7vBFyvs_eUepDsRIiT8B60VZ7RzDMJIB5FABBaeySBDZysqVfch8il8QeDoBDqbp1xY9Cm-N-Rw.MFBJGwXGPIKgydn-.of9MPmzw8SrO6kSVJACoX2gGtlBapWIvb03_zM0MsuXrjLSeo_x7VG8UIJNI_neB5OISIVBoSKBgbvAb4VTwsnRdLoRnGkhp8WdF_FMzHkByXy-6MRj46DjEThkC4lGQbSsXdSGwFKd40e1koiTMq9gFfoYrn6KCzZyemDg_asaO9Tc42rgbDUmj_fwjEos6gmBVJzlICCmqNu-1ZYpy6lALCBcYnA6yxOGQAnrl0op849Q2a_xTIENnMxbOC9wvEl_FE7FFlm7xSjwSFEcNLBtVXSxHejmnPoODvPfO-c5ansSbrUwIYPaxvIiOgD57JYjla0rGH0G6d5vPhW6GQpL686Ve8kMAKjeVAXymmG6j9H3oDv9RSKYFDMwVpNmmv72WwF7hCVXj57HRe8aGgy7t_Zrtv52-k-pp3NOfQjmA62dDaqvpwd9ZMnr9bXoTgVSlt-nLSiyn3o_6rPwvhsP5jZbp54hwHiFn4vmskd4JMeTVgerlf5KiW-nWn09tyI5z3r1Tg0BSaD0m6liPW6wpR82EDblsRqIUAaexgw5vieJi-YWZ4SO2GJN2C1Lu-j3uMRGCL0g1_lYYz6-Bm21rG9a_lkGr9Mn5PoKKmfvkCrNJN7eVDNbHsyNMZUr260teQW59biseie8xvnD5gXlAx4XiE2kPPxf2vBj_cZh31zb39GduO6CSofj5sg9fznNru-68ASOmdNLuOJ0vKr01NOCXdddMfHFkHPTEW6wtGTs-79lPc9qax8T16O30xk4kFKDa28w8Hx5G2kjW-k7rK8SCP5opn8OWint2MNQpo0WlbsmMz-hQ1Y7Yey8vaEmAe0_GvsjwzTLtX83_S2wfVbK1rZ9964VECGlAQPMIAMze2LvCpFFrwH_hIEOMHkQS920lV7IjXePW24fbWFA4U5ddbwucqihRiIQA3GiFfTk3qYkGylFLc2wZ52JmotZOYWHlYT06cFohoJkkziPjAC1fXge-Op8uIpZHu6dFp3iRLIfxSES6NI_vuBgtY0gUkNqJgDpt-C00jiTKT-hNDXr-qOmkK3t7hIuzetBAzEIgwXppy-jSuE8J8JIzyqjljYanMoJ0RC06ghGeMeFktZcSSENxeFu15G0UWv_aT4gIwkj0dpuQlG37Vxa9qgSeWiY7EUXo-KZsBKEjEC40-f2gcfM2Yo1vxMxXyF-xq01IKf0vIwlBaTQlo4Lze7C6mh7y-g--F8vZmbglZt3LLtkAmwppXeLYJ5pZaAIeXw3QSX9buAqFezLHOR2L6Jana0OqFqxOt7ETMiDlWb4T_ZOC.jTYoyUvWjQZZkYs3Rqp3vQ",
+            "IdToken": "eyJraWQiOiJROHJoS3ZzSEVYSG5HaVVHVGQ2M3pnbE9IOE55QVYzdlRGUWdGdmhsc3ZRPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI2N2M0ZWFhOC0yMDkxLTcwZjktZjFlOS1mZjUwMTYwMTUxNzIiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmFwLW5vcnRoZWFzdC0xLmFtYXpvbmF3cy5jb21cL2FwLW5vcnRoZWFzdC0xX05iRGZJa1B4bSIsImNvZ25pdG86dXNlcm5hbWUiOiJ0ZXN0dXNlcjQiLCJvcmlnaW5fanRpIjoiNjU4NGJiNjAtODllZi00M2Q4LTk3YjktNTQ2MjM2MDg0NWJjIiwiYXVkIjoiMXZiZHBiazkxM3M1MWlyYWpydmN0cWw3bnUiLCJldmVudF9pZCI6IjIxNjRiNGRhLTI1YmItNGExNi1hYWY5LTA5YTQ5OWUyMDRiZSIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMyMjY2MDcwLCJleHAiOjE3MzIyNjk2NzAsImlhdCI6MTczMjI2NjA3MCwianRpIjoiNWNkYmVhN2ItMmJjOC00OWZkLWE0MjUtNDVkOTI2NTNiMWQ1IiwiZW1haWwiOiJyb2JlcnQwNzE0QGdtYWlsLmNvbSJ9.YAIfowpzLdzDRQA6NhyMSjtpNjbZXpdBybYxPUvOzUw8Xfr0UBlFgXMmptehovnNJ5lQjGAnxMaHK74DVW7VaXam5VZkynd4bxz64Zz48dVlzD5LwIV8iyKgCQOfBWBuQobQuOpBJxduGwkA0EqBZXMkewRAQKiI731KFyc7SLZHOzETj32dn83gEsuc5oEr-23MLRGS_QF8arPOeJJz7HL4B0NnqRUtKj2xmxvBPIX5Tl6ZEXU5qWivuKlucBl8RFvXHLL99c6RV8BbW9v5JfqepA5AoUsvFnWAa5MZasD1ZO9N9BdJNQYCD-56eBrm4zg-xHxFUUKQ1Dk3_I_uSw"
         }
     }
     ```
@@ -80,7 +80,7 @@ User sign-up with admin confirmation is similar to self-confirmation, as indicat
 1. Use the `sign-up` sub-command to initiate the `sign-up` flow, as follows:
     ```bash
     aws cognito-idp sign-up \
-        --client-id 4s69op0v8es2cojl5ncjql2v4g \
+        --client-id 1vbdpbk913s51irajrvctql7nu \
         --username testuser4 \
         --password Passw0rd$
     ```
@@ -104,7 +104,7 @@ User sign-up with admin confirmation is similar to self-confirmation, as indicat
 3. Now, try to sign-in with your username and password, as follows:
     ```bash
     aws cognito-idp initiate-auth \
-        --client-id 4s69op0v8es2cojl5ncjql2v4g \
+        --client-id 1vbdpbk913s51irajrvctql7nu \
         --auth-flow USER_PASSWORD_AUTH \
         --auth-parameters USERNAME=testuser4,PASSWORD=Passw0rd$
     ```
