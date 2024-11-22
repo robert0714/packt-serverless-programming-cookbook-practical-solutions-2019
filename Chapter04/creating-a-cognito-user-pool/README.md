@@ -149,18 +149,121 @@ Various sections of the CloudFormation template correspond to the CLI commands t
 We can run the `aws cloudformation describe-stacks` command to find the status and get the `user-pool-id`.
 We can also use the `describe-user-pool` sub-command, with the ID returned by the `describe-stacks` sub-command, to verify the new Cognito user pool:
     ```bash
-    ws cognito-idp describe-user-pool \
-        --user-pool-id us-east-1_fYsb1Gyec \
+    aws cognito-idp describe-user-pool \
+        --user-pool-id ap-northeast-1_rXSW6qnjL \
         --profile admin
     ```
     If it is successful, this command will return the current state of the newly created user pool. The initial part of the response contains the `id`, `name`, `policies`, an empty `LambdaConfig`, the last modified date, and the creation date:
-
+    ```json
+    {
+        "UserPool": {
+            "Id": "ap-northeast-1_rXSW6qnjL",
+            "Name": "MyApp User Pool",
+            "Policies": {
+                "PasswordPolicy": {
+                    "MinimumLength": 8,
+                    "RequireUppercase": true,
+                    "RequireLowercase": true,
+                    "RequireNumbers": true,
+                    "RequireSymbols": true,
+                    "TemporaryPasswordValidityDays": 7
+                }
+            },
+            "DeletionProtection": "INACTIVE",
+            "LambdaConfig": {},
+            "LastModifiedDate": "2024-11-22T14:31:09.795000+08:00",
+            "CreationDate": "2024-11-22T14:31:09.795000+08:00",
+            (ommitted..)
+        }
+    }       
+    ``` 
     The `SchemaAttributes` section will contain the definitions for all of the attributes (including the default attributes), in the following format:
-
+    ```json
+    "SchemaAttributes": [
+            {
+                "Name": "profile",
+                "AttributeDataType": "String",
+                "DeveloperOnlyAttribute": false,
+                "Mutable": true,
+                "Required": false,
+                "StringAttributeConstraints": {
+                    "MinLength": "0",
+                    "MaxLength": "2048"
+                }
+            },    
+    ``` 
     Other attributes contained within the `SchemaAttributes` section include the `name`, `given_name`, `family_name`, `middle_name`, `nick_name`, `preferred_username`, `profile`, `picture`, `website`, `email`, `email_verified`, `gender`, `birthdate`, `zoneinfo`, `locale`, `phone_number`, `phone_number_verified`, `address`, and `updated_at`.
 
     The remainder of the response is as follows:
-
+    ```json
+    "AutoVerifiedAttributes": [
+            "email"
+        ],
+        "AliasAttributes": [
+            "email"
+        ],
+        "EmailVerificationMessage": "Your verification code from MyApp is {####}.",
+        "EmailVerificationSubject": "Your verification code from MyApp",
+        "VerificationMessageTemplate": {
+            "EmailMessage": "Your verification code from MyApp is {####}.",
+            "EmailSubject": "Your verification code from MyApp",
+            "DefaultEmailOption": "CONFIRM_WITH_CODE"
+            "DefaultEmailOption": "CONFIRM_WITH_CODE"
+        },
+        "UserAttributeUpdateSettings": {
+            "AttributesRequireVerificationBeforeUpdate": []
+        },
+        "MfaConfiguration": "OFF",
+        "EstimatedNumberOfUsers": 0,
+        "EmailConfiguration": {
+            "EmailSendingAccount": "COGNITO_DEFAULT"
+        },
+        "UserPoolTags": {
+            "Team": "Dev"
+        },
+        },
+        "UserAttributeUpdateSettings": {
+            "AttributesRequireVerificationBeforeUpdate": []
+        },
+        "MfaConfiguration": "OFF",
+        "EstimatedNumberOfUsers": 0,
+        "EmailConfiguration": {
+            "EmailSendingAccount": "COGNITO_DEFAULT"
+        },
+        "UserPoolTags": {
+            "Team": "Dev"
+        },
+        "UserAttributeUpdateSettings": {
+            "AttributesRequireVerificationBeforeUpdate": []
+        },
+        "MfaConfiguration": "OFF",
+        "EstimatedNumberOfUsers": 0,
+        "EmailConfiguration": {
+            "EmailSendingAccount": "COGNITO_DEFAULT"
+        },
+        "UserPoolTags": {
+            "Team": "Dev"
+        },
+        "EstimatedNumberOfUsers": 0,
+        "EmailConfiguration": {
+            "EmailSendingAccount": "COGNITO_DEFAULT"
+        },
+        "UserPoolTags": {
+            "Team": "Dev"
+        },
+            "Team": "Dev"
+        },
+        "AdminCreateUserConfig": {
+        "AdminCreateUserConfig": {
+            "AllowAdminCreateUserOnly": false,
+            "UnusedAccountValidityDays": 7,
+            "InviteMessageTemplate": {
+                "EmailMessage": "Your username for MyApp is {username} and password is {####}.",
+                "EmailSubject": "Your temporary password for MyApp"
+            }
+        },
+        "Arn": "arn:aws:cognito-idp:ap-northeast-1:937197674655:userpool/ap-northeast-1_rXSW6qnjL",  
+    ``` 
 
 10. To clean up, we can delete the user pool by deleting the stack, or keep the stack and reuse it in the next recipe.
 

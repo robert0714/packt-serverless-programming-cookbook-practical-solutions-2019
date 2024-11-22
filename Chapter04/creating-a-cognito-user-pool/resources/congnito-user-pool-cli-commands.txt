@@ -6,10 +6,10 @@ aws cognito-idp create-user-pool \
     --profile admin
 
 aws cognito-idp describe-user-pool \
-    --user-pool-id us-east-1_LccU5yCbI \
+    --user-pool-id ap-northeast-1_iuMPQjyQL \
     --profile admin
 
 aws cognito-idp delete-user-pool \
-    --user-pool-id us-east-1_LccU5yCbI \
+    --user-pool-id ap-northeast-1_iuMPQjyQL \
     --profile admin
 
