@@ -16,13 +16,13 @@ We will now look at how to create a Cognito user pool client, using both AWS CLI
 
 #### Creating a Cognito user pool client with AWS CLI
 Use the `cognito-idp create-user-pool-client` sub-command to create a user pool client, as follows:
-    ```bash
+```bash
     aws cognito-idp create-user-pool-client \
         --user-pool-id us-east-1_fYsb1Gyec \
         --client-name my-user-pool-client \
         --explicit-auth-flows ADMIN_NO_SRP_AUTH \
         --profile admin
-    ```    
+```    
 Here, I have specified `ADMIN_NO_SRP_AUTH` as an explicit auth flow. This will allow us to pass our username and password without SRP. Other options that are allowed include `CUSTOM_AUTH_FLOW_ONLY` and `USER_PASSWORD_AUTH`. A few other authentication flows, including `USER_SRP_AUTH` and `REFRESH_TOKEN_AUTH`, are supported by default. We will see `REFRESH_TOKEN_AUTH` within this recipe, and `USER_SRP_AUTH` within a different recipe.
 
 
