@@ -19,7 +19,7 @@ aws apigateway create-authorizer \
     --rest-api-id 3t0t98ifdh \
     --name First_Cognito_Custom_Authorizer \
     --type COGNITO_USER_POOLS \
-    --provider-arns arn:aws:cognito-idp:us-east-1:<account id>:userpool/us-east-1_LccU5yCbI \
+    --provider-arns arn:aws:cognito-idp:us-east-1:<account id>:userpool/ap-northeast-1_NbDfIkPxm \
     --identity-source method.request.header.Authorization \
     --profile admin
 
@@ -71,7 +71,7 @@ aws apigateway create-deployment \
 https://3t0t98ifdh.execute-api.us-east-1.amazonaws.com/dev/greeting
 
 aws cognito-idp create-user-pool-client \
-    --user-pool-id us-east-1_LccU5yCbI \
+    --user-pool-id ap-northeast-1_NbDfIkPxm \
     --client-name my-user-pool-client \
     --explicit-auth-flows USER_PASSWORD_AUTH \
     --profile admin
@@ -83,7 +83,7 @@ aws cognito-idp sign-up \
     --user-attributes Name=given_name,Value=Heartin
 
 aws cognito-idp admin-confirm-sign-up \
-    --user-pool-id us-east-1_LccU5yCbI \
+    --user-pool-id ap-northeast-1_NbDfIkPxm \
     --username testuser5 \
     --profile admin
 
@@ -93,6 +93,6 @@ aws cognito-idp initiate-auth \
     --auth-parameters USERNAME=testuser5,PASSWORD=Passw0rd$
 
 aws cognito-idp admin-delete-user \
-     --user-pool-id us-east-1_LccU5yCbI \
+     --user-pool-id ap-northeast-1_NbDfIkPxm \
      --username testuser5 \
      --profile admin
