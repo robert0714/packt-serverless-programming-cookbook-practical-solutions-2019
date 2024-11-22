@@ -96,7 +96,7 @@ User sign-up with admin confirmation is similar to self-confirmation, as indicat
 2. Confirm the user as an admin, as follows:
     ```bash
     aws cognito-idp admin-confirm-sign-up \
-        --user-pool-id us-east-1_fYsb1Gyec \
+        --user-pool-id ap-northeast-1_NbDfIkPxm \
         --username testuser4 \
         --profile admin
     ```    

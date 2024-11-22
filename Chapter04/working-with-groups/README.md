@@ -11,21 +11,20 @@ We will look at how to create a group, how to add users to it, and finally, how 
     ```bash
     aws cognito-idp create-group \
         --group-name 'administrators' \
-        --user-pool-id us-east-1_fYsb1Gyec \
+        --user-pool-id ap-northeast-1_NbDfIkPxm \
         --description 'Administrator Group' \
         --profile admin
     ```
     If this is successful, it should return the following response:
     ```json
     {
-        "id": "dxr47i",
-        "name": "First_Cognito_Custom_Authorizer",
-        "type": "COGNITO_USER_POOLS",
-        "providerARNs": [
-            "arn:aws:cognito-idp:us-east-1:㊣㊣㊣㊣㊣㊣㊣:userpool/us-east-1_fYsb1Gyec"
-        ],
-        "authType": "cognito_user_pools",
-        "identitySource": "method.request.header.Authorization"
+        "Group": {
+            "GroupName": "administrators",
+            "UserPoolId": "ap-northeast-1_NbDfIkPxm",
+            "Description": "Administrator Group",
+            "LastModifiedDate": "2024-11-22T17:10:11.908000+08:00",
+            "CreationDate": "2024-11-22T17:10:11.908000+08:00"
+        }
     }
     ```
 
@@ -33,7 +32,7 @@ We will look at how to create a group, how to add users to it, and finally, how 
 4. Add the user regular_user to the `authenticated_users`, as follows:
     ```bash
     aws cognito-idp admin-add-user-to-group \
-        --user-pool-id us-east-1_fYsb1Gyec \
+        --user-pool-id ap-northeast-1_NbDfIkPxm \
         --username regular_user \
         --group-name authenticated_users \
         --profile 
@@ -43,7 +42,7 @@ We will look at how to create a group, how to add users to it, and finally, how 
     ```bash
     aws cognito-idp admin-list-groups-for-user \
         --username admin_user \
-        --user-pool-id us-east-1_fYsb1Gyec \
+        --user-pool-id ap-northeast-1_NbDfIkPxm \
         --profile admin
     ```
     If this is successful, it should return the details of the two groups to which the user `admin_user` belongs, as follows:
@@ -52,14 +51,14 @@ We will look at how to create a group, how to add users to it, and finally, how 
         "Groups": [
             {
                 "GroupName": "administrators",
-                "UserPoolId": "us-east-1_fYsb1Gyec",
+                "UserPoolId": "ap-northeast-1_NbDfIkPxm",
                 "Description": "Administrator Group",
                 "LastModifiedDate": 1544632026.41,
                 "CreationDate": 1544632026.41
             },
             {
                 "GroupName": "authenticated_users",
-                "UserPoolId": "us-east-1_fYsb1Gyec",
+                "UserPoolId": "ap-northeast-1_NbDfIkPxm",
                 "Description": "Authenticated User Group",
                 "LastModifiedDate": 1544632036.115,
                 "CreationDate": 1544632036.115
@@ -74,7 +73,7 @@ If this is successful, it should return the details of the one group to which th
         "Groups": [
             {
                 "GroupName": "authenticated_users",
-                "UserPoolId": "us-east-1_fYsb1Gyec",
+                "UserPoolId": "ap-northeast-1_NbDfIkPxm",
                 "Description": "Authenticated User Group",
                 "LastModifiedDate": 1544632036.115,
                 "CreationDate": 1544632036.115
