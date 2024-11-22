@@ -6,7 +6,7 @@ To work with a Cognito user pool, we also need an app client for the user pool. 
 ## Getting ready
 The following are the prerequisites for completing this recipe:
 
-A Cognito user pool that was created via the recipe, *Creating a Cognito user pool*
+A Cognito user pool that was created via the recipe, [Creating a Cognito user pool](../creating-a-cognito-user-pool/README.md). 
 
 ## How to do it...
 We will first create the app client, and then, we'll execute the admin-specific API commands, to demonstrate the server-side authentication flow.
@@ -18,10 +18,29 @@ We will now look at how to create a Cognito user pool client, using both AWS CLI
 Use the `cognito-idp create-user-pool-client` sub-command to create a user pool client, as follows:
 ```bash
     aws cognito-idp create-user-pool-client \
-        --user-pool-id us-east-1_fYsb1Gyec \
+        --user-pool-id ap-northeast-1_NbDfIkPxm \
         --client-name my-user-pool-client \
         --explicit-auth-flows ADMIN_NO_SRP_AUTH \
         --profile admin
+
+{
+    "UserPoolClient": {
+        "UserPoolId": "ap-northeast-1_NbDfIkPxm",
+        "ClientName": "my-user-pool-client",
+        "ClientId": "bd726017pgl4utca13kinbbmh",
+        "LastModifiedDate": "2024-11-22T16:07:44.464000+08:00",
+        "CreationDate": "2024-11-22T16:07:44.464000+08:00",
+        "RefreshTokenValidity": 30,
+        "TokenValidityUnits": {},
+        "ExplicitAuthFlows": [
+            "ADMIN_NO_SRP_AUTH"
+        ],
+        "AllowedOAuthFlowsUserPoolClient": false,
+        "EnableTokenRevocation": true,
+        "EnablePropagateAdditionalUserContextData": false,
+        "AuthSessionValidity": 3
+    }
+}        
 ```    
 Here, I have specified `ADMIN_NO_SRP_AUTH` as an explicit auth flow. This will allow us to pass our username and password without SRP. Other options that are allowed include `CUSTOM_AUTH_FLOW_ONLY` and `USER_PASSWORD_AUTH`. A few other authentication flows, including `USER_SRP_AUTH` and `REFRESH_TOKEN_AUTH`, are supported by default. We will see `REFRESH_TOKEN_AUTH` within this recipe, and `USER_SRP_AUTH` within a different recipe.
 
@@ -64,23 +83,15 @@ The server-side authentication flow is used with admin APIs, as follows:
     ```json
     {
         "User": {
-            "Username": "diego",
+            "Username": "testuser",
             "Attributes": [
                 {
                     "Name": "sub",
-                    "Value": "7325c1de-b05b-4f84-b321-9adc6e61f4a2"
-                },
-                {
-                    "Name": "phone_number",
-                    "Value": "+15555551212"
-                },
-                {
-                    "Name": "email",
-                    "Value": "diego@example.com"
+                    "Value": "77641ad8-6071-707f-0f39-70b70939d731"
                 }
             ],
-            "UserCreateDate": 1548099495.428,
-            "UserLastModifiedDate": 1548099495.428,
+            "UserCreateDate": "2024-11-22T16:10:17.724000+08:00",
+            "UserLastModifiedDate": "2024-11-22T16:10:17.724000+08:00",
             "Enabled": true,
             "UserStatus": "FORCE_CHANGE_PASSWORD"
         }
@@ -90,11 +101,13 @@ The server-side authentication flow is used with admin APIs, as follows:
 2. Initiate the authentication flow as an admin, as follows:
     ```bash
     aws cognito-idp admin-initiate-auth \
-        --user-pool-id us-east-1_fYsb1Gyec \
-        --client-id 4o1kgtd4sj39nr36ouak5mhblt \
+        --user-pool-id ap-northeast-1_NbDfIkPxm \
+        --client-id bd726017pgl4utca13kinbbmh \
         --auth-flow ADMIN_NO_SRP_AUTH \
         --auth-parameters USERNAME=testuser,PASSWORD=Passw0rd$ \
         --profile admin
+
+
     ```
     > Note that we have specified ADMIN_NO_SRP_AUTH. This call will fail if we do not configure this option within explicit auth flows during the client creation. Also, remember to replace the value for client-id with our client ID from the previous step.
 
@@ -102,19 +115,19 @@ The server-side authentication flow is used with admin APIs, as follows:
     ```json
     {
         "ChallengeName": "NEW_PASSWORD_REQUIRED",
+        "Session": "<session-id>",
         "ChallengeParameters": {
             "USER_ID_FOR_SRP": "testuser",
             "requiredAttributes": "[]",
             "userAttributes": "{}"
-        },
-        "Session": "AYABeC1-y8qooiuysEv0uM4wAqQAHQABAAdTZXJ2aWNlABBDb2duaXRvVXNlclBvb2xzAAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLXd..."
+        }
     }
     ```
 3. We will then send a response to the `auth` challenge, as follows:
     ```bash
     aws cognito-idp admin-respond-to-auth-challenge \
-        --user-pool-id us-east-1_fYsb1Gyec \
-        --client-id 5hh4v7nveu22vea74h8stt9238 \
+        --user-pool-id ap-northeast-1_NbDfIkPxm \
+        --client-id bd726017pgl4utca13kinbbmh \
         --challenge-name NEW_PASSWORD_REQUIRED \
         --challenge-responses USERNAME=testuser,NEW_PASSWORD=NewPass0123$ \
         --session <session-id> \
@@ -123,22 +136,22 @@ The server-side authentication flow is used with admin APIs, as follows:
     If it is successful, this command will return a response with three tokens (an access token, a refresh token, and an ID token):
     ```json
     {
-    "ChallengeParameters": {},
-    "AuthenticationResult": {
-        "AccessToken": "eyJraWQiOiI0VTY1ZHNqWlgyRHZoUDNwVFhnaTVkNU4zNkhmUkd00FFVZHFvd1pmTXVnPSIsImFsZyIjA2MGMyMGRkLWVjZjktMTFl0C040Tg1LWNkMzIwOGIxODA5NSIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ2aXRvLWlkcC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0xX2ZZc2IxR3llYyIsImV4CCI6MTU0MjCONTA5MiwiaWF0IjOiI1aGg0djdudmV1MjJ2ZWE3NGg4c3R00TIzOCIsInVzZXJuYW1lIjoidGVzdHVzZXIifQ.Eg3Z1kAJyJ-NEXmWmbavMV325_Uh-UTecuFeXtYLKHjc_rD7gj8vp50NfDQN5m_u8fP8Q8JRFTsLPaGR6C3qX6u0F_HR6BN_YWpHYtBudsShz2qGlryxcvqSzfpzbws8rMli5xZNIxmwna0c0CycbED8buKQ49Mj_g",
-        "ExpiresIn": 3600,
-        "TokenType": "Bearer",
-        "RefreshToken": "eyJjdHki0iJKV1QiLCJlbmMi0iJBMjU2RONNIiwiYWxnIjoiUlSBLU9BRVAifQ.BnFlQ7rap5v7g4aapMvMJPUejJIwTkqnPpAYjRNJsECnIlKgVYa8gmfkVLmPaGT8p2NmuIicHDZoPhY60VwAHrtVBWzq9xXX4g-k4PKIerEaMK4vZGMcLlMHcUNex7usnE0xvu0ryXrSniWAi3Sq940xjfEFgpfM2g.4WtMGmzXd8KEzU1P.g7zcSVH6RXguLWAeTa0ALcJghunwYB7Z5gSAEfbdCTXsWaAfddTlNyGweh0e6S34q4t4egQtgTZWjcUdBuCRkvcCUU_V3YC38SxENfNmxw9AzVfRg7PQKM4M5Pt2vU-CZx8Hklat31fojErd-3YBOLzgYIq8_0qMNhVWoeJCA3AjsB0vQ2R7z_qyaTXqbQBBpR0QfjaQD0psT404xRJ_Blqxs_PEm2Ego7mXsjo6SoILgVRX5q gZ0KjqXci91M-65MJB7HbLOUXYouOYPLazE_J3P0npEEAUUc9hx2RCHbfh8EUyPFiHv890mNukhcuyfNlh5N8EPLyy5Gmxf8MGgfe0jqPtnA4J5f380vD5mXF2Dx_iF1-1MNdcZnQzUG-1Z0yG9rTchnrPIk6JLMCXhUQFu9791plCSKRf1oLiZTSg0e0PB_h2lGTJaU2ULEklYj6qpxKaryd-ysY7C1YDPf-ee_w0-MN5maUjwXuzpKrboiwEBsjfrGSnwd4M58GHHQtqUZMUbVQn6hoVElyYNvhgXdXByuVTxGKmHdmBu28hbuhYt7Y1h409AqhBWAhqUFez2BqBeGYT_tsv3FELK1-s7qPrNvkwLQYPaXDooLgKNVMqjnVbpIsbLU4DW4nAHLWNx9d165saUwcaMUuw.Wa_lkFBRerl1zeoKjE32XA",
-        "IdToken": "eyJraWQi0iJlVWh6bWYzR28wNDcrVW01b3dybDdReHZuamdvYjFlbk9ZV3NnV1FvZEc0PSIsImFsZyI6I1dmV1MjJ2ZWE3NGg4c3R00TIzOCIsImV2ZW50X2lkIjoiMDYwYzIwZGQtZWNm0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMjA4YjE4MDk1IiwidG9rZWYXN0S0xMWU4LTg50DUtY2QzMj"
-       }
+        "ChallengeParameters": {},
+        "AuthenticationResult": {
+            "AccessToken": "eyJraWQiOiJvbjJMb2FxeGhhbTlSTUhGXC84R01cLytOQU9JdWt6SGI1RStRVnFoeHFLb3c9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiI3NzY0MWFkOC02MDcxLTcwN2YtMGYzOS03MGI3MDkzOWQ3MzEiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtbm9ydGhlYXN0LTEuYW1hem9uYXdzLmNvbVwvYXAtbm9ydGhlYXN0LTFfTmJEZklrUHhtIiwiY2xpZW50X2lkIjoiYmQ3MjYwMTdwZ2w0dXRjYTEza2luYmJtaCIsIm9yaWdpbl9qdGkiOiJmMmNiYzRhYi0yYzgwLTRmNTUtODQyMy04OWQ5ZjQ5ZjRkOGIiLCJldmVudF9pZCI6IjUxZmU3NWIyLTc2MTUtNGMzNC1iMTFlLTkyYmFmZDQzZTIyMCIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3MzIyNjMyMzQsImV4cCI6MTczMjI2NjgzNCwiaWF0IjoxNzMyMjYzMjM0LCJqdGkiOiIyZjMxYjNiZi0zNGU0LTRkNzQtYTZkOC04NTUzOTIxZTEyNmQiLCJ1c2VybmFtZSI6InRlc3R1c2VyIn0.fpAy-dqqdiD3IJWHMS4ijzbpiR2qekaWj7KTDTeCqI_2y-oIApFx-6rytTtVhpXfWqvI7TX47_nNg-QhYXNLwzxrR31wjN2NCsZod5z8LlLds3ifdM0gwwDYcvMAIHDxmYEnoDbidAbrIVXK6fhCYMn6Taci4bnZ2FMeMDu6QffqN1n_LKmD-8Tk7ZsiFksIy6KMuqjYAISYVL42QnffxDMNeIAulReNh3mLspIooRhd91iTrlbJiV1-jtOPZKfmLbc-ML4fIXle3mma4kXvI1NGLTjB_dgRw4Z288vfxXkplVZzZapREqSvsjuYAxVusOLg8U-5m2zktiOt9e86GQ",
+            "ExpiresIn": 3600,
+            "TokenType": "Bearer",
+            "RefreshToken": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.PRyqUzY_Pl8XMyhG8FHgmLXQYOOW_LGp9F8JZHqh9MI4UCYrU9O2fFTJQCavGISrFsxK9uesmRbWnCVMeLWk8dB3juWvgad50FQPzn5xSQ015wKoH1-VyKlmRiFvR-I1BVBsNiWb8IhDG2hR51s05BzPsz4G0JSo5p3K-rdDxUJy5M4LdnoPcr_0aVQLDf97RQfcNIi2z6WKq00NgRhC6IaG1emNo2BDcYu1qhx5AIKLUUDeDiaopnCVPzjCIvTe711DjRy61nsN5GTJDZIgb1zfJaeT0y09b1r2ms-FTTZdXsFAq7nooAZ3-rPlceceIwIDoGZQbxRSR9idf1IOug.xK5VAzMSKPQoO9Qy.0VCd4Q_7v_i1i5u2-bei_UI5NutN4Ml3PBRhHWq98ItxAljAsaVHY8PZNifevN0lRADRA5OxQCrVQE2pLPmDmgFmxyJAiUATHMkbYrhLUCNy9rRio8pmvm1ecVSqUj1s8BEVt8YBdqhX3zboEipFoUPZoV1oF72tqaUbAypZhs1a2hFmLHM7Cwlrnr5LdP5rgKzMPI-N3n5sbUUxAcBvST8jctN2c9y3dSCsp-1pRLUqOR5ZFr9UYPB_SA3dU6XHQD_C-PE620Y6h98TUC6TmrV3x0i-KvhiNB1wFLEK5Eo8K26mnqOdHCahdYqorbZoWo9xyTV3PvP5XU0jQxjF7JBZSe2pengBGBvCo4AIH4K35LQstsNOj0EiOnxu9qSeSfh1iLq4QMOM7xr50cFlNQEKhRtwgLW5VMkIDBxpMo4IbfhdQqxQ9Tr6Oc2OM-MgX8SU2TokHcRVVsY-HyHHhDEENFdjZ-qCTohyWrEzTKT9fzgXELfIlGHIWuCV4uJhUjYRfkuyHc49E-5I1YeLIf937kNRIAwHFfR1Xixw43aBh-Z96klFMeIwbKcX3EMr-odCCT29qGlxFnL3JNPWQFryyjVLTXHvHC647EOHqDQX-TJdRVnKsPempaUmsg1NI5fw-VdVwKomevyC1_TsWzAkvBTmd-iOoc47BxJAhoS--smPEs_3TZ3R-5FGGTDDt4gs5Sc9cPG9AHvbzLPrdJdCg_1NHqikhdCYNFjy5_2_b3-UliNlHzwWVscu8GtKfue5WWjBFLbX2gNtjUfiEdacBpdDMTx3Z-s_mRePE8FVKiPlIkTFxJagy-W9jHkGeGi38aRqFixoLJcZrHUnIJqFRM4TiLzLsYJwCbQXDuw3UoScQBbMkzHQEt7PD-G8q078tX82LTNRCNvWTCKgyelsBXJ5oFLfohxUaYzSyeUaiIRh89-xEIES4jP7plzTgAI_V5RlSxXZ1fYS9EilxlnJLLydP9JYIicMRp_Px8QGuZNa4Qzcn-FrQCcQY16gAlWfjTm-ybeypb2G5QTIHn5iZJsSlsZr6uiePAE-SKVIKrN7kHps9DQNXTDGa3qOB_MhcvghuM4RNZwr4qzOivv9VxdfuLeEYgYm61XefO11zgyNmY6eShYqoZxcHMy1hZmo19MDpLsDIh0m2YX2mL6ZwxUou5h7KesLG-V1_VV7edyVFFXot_J7VkOO5WAFDYEa4E_go7_JZMME0f4lyFvAHg_uZ0CqTrlF6gCR1iHDfQfIHyi-DhNnR9BZCx4qvQ-dHOsU_nqTzQvbrsaOpSVP.-OrjU8lfIomBcRr5r6W0dA",
+            "IdToken": "eyJraWQiOiJROHJoS3ZzSEVYSG5HaVVHVGQ2M3pnbE9IOE55QVYzdlRGUWdGdmhsc3ZRPSIsImFsZyI6IlJTMjU2In0.eyJvcmlnaW5fanRpIjoiZjJjYmM0YWItMmM4MC00ZjU1LTg0MjMtODlkOWY0OWY0ZDhiIiwic3ViIjoiNzc2NDFhZDgtNjA3MS03MDdmLTBmMzktNzBiNzA5MzlkNzMxIiwiYXVkIjoiYmQ3MjYwMTdwZ2w0dXRjYTEza2luYmJtaCIsImV2ZW50X2lkIjoiNTFmZTc1YjItNzYxNS00YzM0LWIxMWUtOTJiYWZkNDNlMjIwIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE3MzIyNjMyMzQsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC5hcC1ub3J0aGVhc3QtMS5hbWF6b25hd3MuY29tXC9hcC1ub3J0aGVhc3QtMV9OYkRmSWtQeG0iLCJjb2duaXRvOnVzZXJuYW1lIjoidGVzdHVzZXIiLCJleHAiOjE3MzIyNjY4MzQsImlhdCI6MTczMjI2MzIzNCwianRpIjoiNjFkMWJmYWUtMWVjOC00NTljLTlmYWEtYTA2MzE4ZTAzMjUxIn0.Im0LyUC55hmovVd1Xe-ypeYVr162rWVZiKO9MnC3Gr3yDYXRyCbxKI6zp62rs6LzXcN114VpuSA-LKcaTCEipDDCu6pLyqrMTjB6fRg8ngfQuPAdGy-PW0CIii2fBCaInfdsMzAkR4PYzzPRD1OnqrJpkhhGk-mlVgx14qw_v7gIXpD5Rq7UCKTSR-xBHCLImdH0uyZc1RoWgoI1A38AGaef1HbMiUS3WFWL1F_KFIDqeQ-fWgLY4W0n6hDBOhXv9y6T-vaLE_ZeT_kzD1rGFmCht-Y1T1LB3q_ZwuMuZMFmhNml0FChyE7hxZmhkwO9amAbd_zBNMLkjU0zWjeHZg"
+        }
     }
     ```
     We can try to run the `initiate auth` command with the new password; we will see that it does not ask for the password challenge. Instead, it returns the tokens.
 4. From now on, we can use the refresh token to regenerate the access token and the ID token:
     ```bash
     aws cognito-idp admin-initiate-auth \
-        --user-pool-id us-east-1_fYsb1Gyec \
-        --client-id 5hh4v7nveu22vea74h8stt9238 \
+        --user-pool-id ap-northeast-1_NbDfIkPxm \
+        --client-id bd726017pgl4utca13kinbbmh \
         --auth-flow REFRESH_TOKEN_AUTH \
         --auth-parameters REFRESH_TOKEN=<refresh-token> \
         --profile admin
@@ -147,16 +160,16 @@ The server-side authentication flow is used with admin APIs, as follows:
 5. To clean up, delete the user pool client, as follows:
     ```bash
     aws cognito-idp delete-user-pool-client \
-        --user-pool-id us-east-1_fYsb1Gyec \
-        --client-id 5hh4v7nveu22vea74h8stt9238 \
+        --user-pool-id ap-northeast-1_NbDfIkPxm \
+        --client-id bd726017pgl4utca13kinbbmh \
         --profile admin
     ```
     Delete the user that we created for this recipe, as follows:
     ```bash
     aws cognito-idp admin-delete-user \
-    --user-pool-id us-east-1_fYsb1Gyec \
-    --username testuser \
-    --profile admin
+        --user-pool-id ap-northeast-1_NbDfIkPxm  \
+        --username testuser \
+        --profile admin
     ``` 
 ## How it works...
 To summarize, we did the following in this recipe:
