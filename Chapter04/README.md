@@ -6,7 +6,7 @@ This chapter will cover the following topics:
 * [User sign-up flow with Cognito](./user-sign-up-flow-with-cognito/README.md) (AWS CLI)
 * [Working with groups](./working-with-groups/README.md) (AWS CLI)
 * [Integrating Cognito in an API gateway](./integrating-cognito-with-api-gateway/README.md) (AWS CLI, CloudFormation)
-* [User sign-up with SMS verification and MFA](./user-sign-up-with-sms-and-mfa-verification/) (AWS CLI, CloudFormation)
+* [User sign-up with SMS verification and MFA](./user-sign-up-with-sms-and-mfa-verification/README.md) (AWS CLI, CloudFormation)
 
 ## Introduction
 In the previous chapters, we learned how to create serverless functions, REST APIs, and data stores. In this chapter, we will use Amazon Cognito to provide application-level security and user management, including user sign-in, sign-up, and access control. We will also discuss Cognito's integration with API gateway APIs.
