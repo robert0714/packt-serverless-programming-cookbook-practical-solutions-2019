@@ -3,51 +3,84 @@ package tech.heartin.books.serverlesscookbook.services;
 import tech.heartin.books.serverlesscookbook.domain.Request;
 import tech.heartin.books.serverlesscookbook.domain.Response;
 
-import java.util.Arrays;
-
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
-import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
-import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
-import com.amazonaws.services.dynamodbv2.model.KeyType;
-import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
-import com.amazonaws.services.dynamodbv2.util.TableUtils;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
+import software.amazon.awssdk.services.dynamodb.model.CreateTableRequest;
+import software.amazon.awssdk.services.dynamodb.model.DescribeTableRequest;
+import software.amazon.awssdk.services.dynamodb.model.KeySchemaElement;
+import software.amazon.awssdk.services.dynamodb.model.KeyType;
+import software.amazon.awssdk.services.dynamodb.model.ProvisionedThroughput;
+import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
+import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
 /**
- * Implementation of DynamoDBService that use AmazonDynamoDB client.
+ * Implementation of DynamoDBService that uses DynamoDbClient from AWS SDK v2..<br/>
+ * https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/java_dynamodb_code_examples.html
  */
 public class DynamoDBServiceImpl2 implements DynamoDBService {
 
-    private final AmazonDynamoDB dynamoDBClient;
+    private final DynamoDbClient dynamoDbClient;
 
     public DynamoDBServiceImpl2() {
-        this.dynamoDBClient = AmazonDynamoDBClientBuilder.defaultClient();
+        this.dynamoDbClient = DynamoDbClient.create();
     }
 
     @Override
     public final Response createTable(final Request request) {
-
-        final CreateTableRequest createTableRequest = new CreateTableRequest(
-                Arrays.asList(
-                        new AttributeDefinition(request.getPartitionKey(), ScalarAttributeType.S),
-                        new AttributeDefinition(request.getSortKey(), ScalarAttributeType.N)),
-                request.getTableName(),
-                Arrays.asList(
-                        new KeySchemaElement(request.getPartitionKey(), KeyType.HASH),
-                        new KeySchemaElement(request.getSortKey(), KeyType.RANGE)),
-                new ProvisionedThroughput(request.getReadCapacityUnits(), request.getWriteCapacityUnits()));
-
-        TableUtils.createTableIfNotExists(this.dynamoDBClient, createTableRequest);
-
         try {
-            TableUtils.waitUntilActive(this.dynamoDBClient, request.getTableName());
-        } catch (final AmazonClientException | InterruptedException e) {
-            return new Response(null, "Failed in table active check in API version V2: " + e.getMessage());
-        }
+            CreateTableRequest createTableRequest = CreateTableRequest.builder()
+                .attributeDefinitions(
+                    AttributeDefinition.builder()
+                        .attributeName(request.getPartitionKey())
+                        .attributeType(ScalarAttributeType.S)
+                        .build(),
+                    AttributeDefinition.builder()
+                        .attributeName(request.getSortKey())
+                        .attributeType(ScalarAttributeType.N)
+                        .build()
+                )
+                .tableName(request.getTableName())
+                .keySchema(
+                    KeySchemaElement.builder()
+                        .attributeName(request.getPartitionKey())
+                        .keyType(KeyType.HASH)
+                        .build(),
+                    KeySchemaElement.builder()
+                        .attributeName(request.getSortKey())
+                        .keyType(KeyType.RANGE)
+                        .build()
+                )
+                .provisionedThroughput(ProvisionedThroughput.builder()
+                    .readCapacityUnits(request.getReadCapacityUnits())
+                    .writeCapacityUnits(request.getWriteCapacityUnits())
+                    .build())
+                .build();
 
-        return new Response(request.getTableName() + " created with API version V2.", null);
+            // Check if table exists
+            try {
+                DescribeTableRequest describeTableRequest = DescribeTableRequest.builder()
+                    .tableName(request.getTableName())
+                    .build();
+                dynamoDbClient.describeTable(describeTableRequest);
+                return new Response(request.getTableName() + " already exists.", null);
+            } catch (ResourceNotFoundException e) {
+                // Table doesn't exist, create it
+                dynamoDbClient.createTable(createTableRequest);
+            }
+
+            // Wait for table to become active
+            DynamoDbWaiter waiter = dynamoDbClient.waiter();
+            DescribeTableRequest describeTableRequest = DescribeTableRequest.builder()
+                .tableName(request.getTableName())
+                .build();
+
+            waiter.waitUntilTableExists(describeTableRequest);
+
+            return new Response(request.getTableName() + " created with API version V2.", null);
+
+        } catch (Exception e) {
+            return new Response(null, "Failed to create table in API version V2: " + e.getMessage());
+        }
     }
 }

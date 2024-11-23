@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: lambda-dynamodb-put-item
+
+Globals:
+  Function:
+    Runtime: java17
+    MemorySize: 512
+    Timeout: 25
+    Environment:
+      Variables:
+        LOCATIONS_TABLE: !Ref myTable
+
+Resources:
+  LambdaFunctionWithCF:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: lambda-dynamodb-put-item
+      CodeUri: ../lambda-dynamodb-put-item/target/lambda-dynamodb-put-item-0.0.1-SNAPSHOT.jar
+      Handler: tech.heartin.books.serverlesscookbook.MyLambdaHandler::handleRequest
+      MemorySize: 512
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref myTable
+  myTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: my_table
+      PrimaryKey:
+        Name: id
+        Type: String

@@ -1,0 +1,22 @@
+```
+$ CF_BUCKET=dev-for-tw-robert-20241020
+$ sam deploy --s3-bucket $CF_BUCKET --stack-name ch03stack-p   --capabilities CAPABILITY_IAM
+
+$ aws lambda invoke \
+    --invocation-type RequestResponse \
+    --function-name lambda-dynamodb-put-item \
+    --log-type Tail \
+    --cli-binary-format raw-in-base64-out \
+    --payload '{
+                    "tableName":"my_table",
+                    "partitionKey": "id",
+                    "sortKey": "dateandtime",
+                    "partitionKeyValue": "p1",
+                    "sortKeyValue": 1537963031,
+                    "waitForActive": false
+                }' \
+    outputfile.txt
+
+$ aws cloudformation delete-stack \
+    --stack-name ch03stack-p 
+```

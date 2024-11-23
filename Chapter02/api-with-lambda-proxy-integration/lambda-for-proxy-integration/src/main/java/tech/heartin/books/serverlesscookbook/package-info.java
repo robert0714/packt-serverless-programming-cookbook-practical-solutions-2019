@@ -1,4 +1,4 @@
 /**
  * Package for lambdas.
  */
-package tech.heartin.books.serverless;
+package tech.heartin.books.serverlesscookbook;

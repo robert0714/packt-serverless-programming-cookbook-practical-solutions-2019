@@ -1,56 +1,118 @@
 package tech.heartin.books.serverlesscookbook.services;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.Table;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.DescribeTableRequest;
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.TableStatus;
 
 import tech.heartin.books.serverlesscookbook.domain.Request;
 import tech.heartin.books.serverlesscookbook.domain.Response;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 /**
- * Implementation of DynamoDBService that use DynamoDB wrapper client.
+ * Implementation of DynamoDBService that uses DynamoDB SDK v2 client.<br/>
+ * https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/java_dynamodb_code_examples.html
  */
 public class DynamoDBServiceImpl1 implements DynamoDBService {
 
-    private final DynamoDB dynamoDB;
+    private final DynamoDbClient dynamoDbClient;
 
     public DynamoDBServiceImpl1() {
-        final AmazonDynamoDB dynamoDBClient = AmazonDynamoDBClientBuilder.defaultClient();
-        this.dynamoDB = new DynamoDB(dynamoDBClient);
-
+        this.dynamoDbClient = DynamoDbClient.create();
     }
 
     @Override
     public final Response putItem(final Request request) {
-
-        Table table = dynamoDB.getTable(request.getTableName());
-
-        if (request.isWaitForActive()) {
-            try {
-                table.waitForActive();
-            } catch (InterruptedException e) {
-                return new Response(null,
-                        "Error while waiting for table to become active with API version V2: " + e.getMessage());
+        try {
+            // Wait for table to become active if required
+            if (request.isWaitForActive()) {
+                waitForTableToBeActive(request.getTableName());
             }
+
+            // Prepare the item attributes
+            Map<String, AttributeValue> itemAttributes = new HashMap<>();
+
+            // Add primary key
+            itemAttributes.put(request.getPartitionKey(),
+                AttributeValue.builder().s(request.getPartitionKeyValue()).build());
+
+            if (request.getSortKey() != null) {
+                itemAttributes.put(request.getSortKey(),
+                    AttributeValue.builder().n(String.valueOf(request.getSortKeyValue())).build());
+            }
+
+            // Add string attributes
+            if (request.getStringData() != null) {
+                request.getStringData().forEach((k, v) ->
+                    itemAttributes.put(k, AttributeValue.builder().s(v).build())
+                );
+            }
+
+            // Add integer attributes
+            if (request.getIntegerData() != null) {
+                request.getIntegerData().forEach((k, v) ->
+                    itemAttributes.put(k, AttributeValue.builder().n(String.valueOf(v)).build())
+                );
+            }
+
+            // Create PutItem request
+            PutItemRequest putItemRequest = PutItemRequest.builder()
+                .tableName(request.getTableName())
+                .item(itemAttributes)
+                .build();
+
+            // Put item into DynamoDB
+            dynamoDbClient.putItem(putItemRequest);
+
+            return new Response("Item added into " + request.getTableName() + " with API version V1.", null);
+
+        } catch (Exception e) {
+            return new Response(null,
+                "Error while adding item with API version V1: " + e.getMessage());
         }
-
-        Item item = new Item()
-                .withPrimaryKey(request.getPartitionKey(), request.getPartitionKeyValue(),
-                        request.getSortKey(), request.getSortKeyValue());
-
-        if (request.getStringData() != null) {
-            request.getStringData().forEach((k, v) -> item.withString(k, v));
-        }
-
-        if (request.getIntegerData() != null) {
-            request.getIntegerData().forEach((k, v) -> item.withInt(k, v));
-        }
-
-        table.putItem(item);
-
-        return new Response("Item added into " + request.getTableName() + " with API version V1.", null);
     }
 
+    /**
+     * Custom method to wait for table to become active.
+     * @param tableName Name of the DynamoDB table
+     * @throws InterruptedException if waiting is interrupted
+     */
+    private void waitForTableToBeActive(final String tableName) throws InterruptedException {
+
+        // Maximum number of attempts
+        int maxAttempts = Integer.parseInt(Optional.ofNullable(System.getenv("dynamodb.max.attempts"))
+            .orElse(Optional.ofNullable(System.getProperty("dynamodb.max.attempts")).orElse("20")));
+
+        // seconds
+        int waitTimeBetweenAttempts = Integer.parseInt(
+             Optional.ofNullable(System.getenv("dynamodb.wait.time.between.attempts"))
+              .orElse(Optional.ofNullable(System.getProperty("dynamodb.wait.time.between.attempts")).orElse("5")));
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                DescribeTableRequest describeTableRequest = DescribeTableRequest.builder()
+                    .tableName(tableName)
+                    .build();
+
+                TableStatus status = dynamoDbClient.describeTable(describeTableRequest)
+                    .table().tableStatus();
+
+                if (status == TableStatus.ACTIVE) {
+                    return; // Table is active, exit method
+                }
+            } catch (Exception e) {
+                // Log or handle exception if needed
+            }
+
+            // Wait before next attempt
+            TimeUnit.SECONDS.sleep(waitTimeBetweenAttempts);
+        }
+
+        throw new InterruptedException("Table did not become active within the expected time");
+    }
 }

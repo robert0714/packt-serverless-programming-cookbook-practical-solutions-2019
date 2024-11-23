@@ -3,105 +3,99 @@ package tech.heartin.books.serverlesscookbook.services;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
-import com.amazonaws.services.dynamodbv2.model.GetItemResult;
-import com.amazonaws.services.dynamodbv2.model.QueryRequest;
-import com.amazonaws.services.dynamodbv2.model.QueryResult;
-import com.amazonaws.services.dynamodbv2.model.ScanRequest;
-import com.amazonaws.services.dynamodbv2.model.ScanResult;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
+import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
+import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
+import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
 
 import tech.heartin.books.serverlesscookbook.domain.Request;
 import tech.heartin.books.serverlesscookbook.domain.Response;
 
 /**
- * Implementation of DynamoDBService that use AmazonDynamoDB client.
+ * Implementation of DynamoDBService that uses DynamoDbClient (SDK v2)..<br/>
+ * https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/java_dynamodb_code_examples.html
  */
 public class DynamoDBServiceImpl2 implements DynamoDBService {
 
-    private final AmazonDynamoDB dynamoDBClient;
+    private final DynamoDbClient dynamoDbClient;
 
     public DynamoDBServiceImpl2() {
-        this.dynamoDBClient = AmazonDynamoDBClientBuilder.defaultClient();
+        this.dynamoDbClient = DynamoDbClient.create();
     }
 
     @Override
     public final Response getItem(final Request request) {
+        final Map<String, AttributeValue> primaryKey = new HashMap<>();
+        primaryKey.put(request.getPartitionKey(),
+            AttributeValue.builder().s(request.getPartitionKeyValue()).build());
+        primaryKey.put(request.getSortKey(),
+            AttributeValue.builder().n(request.getSortKeyValue()).build());
 
-        final HashMap<String, AttributeValue> primaryKey = new HashMap<>();
-        primaryKey.put(request.getPartitionKey(), new AttributeValue(request.getPartitionKeyValue()));
-        primaryKey.put(request.getSortKey(), new AttributeValue().withN(request.getSortKeyValue()));
-
-        final GetItemResult getItemResult = dynamoDBClient.getItem(new GetItemRequest()
-                .withTableName(request.getTableName())
-                .withKey(primaryKey));
+        final GetItemResponse getItemResult = dynamoDbClient.getItem(GetItemRequest.builder()
+                .tableName(request.getTableName())
+                .key(primaryKey)
+                .build());
 
         return new Response("PK of Item read using get-item (V2): "
-                + prepareKeyStr(getItemResult.getItem(), request), null);
+                + prepareKeyStr(getItemResult.item(), request), null);
     }
 
     @Override
     public final Response query(final Request request) {
-
         final Map<String, AttributeValue> expressionAttributeValues = new HashMap<>();
         expressionAttributeValues.put(":" + request.getPartitionKey(),
-                new AttributeValue(request.getPartitionKeyValue()));
+                AttributeValue.builder().s(request.getPartitionKeyValue()).build());
 
         final String keyConditionExpression = request.getPartitionKey() + "=:" + request.getPartitionKey();
 
-        QueryRequest queryRequest = new QueryRequest()
-                .withTableName(request.getTableName())
-                .withKeyConditionExpression(keyConditionExpression)
-                .withExpressionAttributeValues(expressionAttributeValues);
+        QueryRequest.Builder queryRequestBuilder = QueryRequest.builder()
+                .tableName(request.getTableName())
+                .keyConditionExpression(keyConditionExpression)
+                .expressionAttributeValues(expressionAttributeValues);
 
-        StringBuilder filterExpressionBuilder;
         if (request.getFilterData() != null) {
-            filterExpressionBuilder = new StringBuilder();
+            StringBuilder filterExpressionBuilder = new StringBuilder();
             processFilterData(request, filterExpressionBuilder, expressionAttributeValues);
-            //Add to QueryRequest.
-            queryRequest.withFilterExpression(filterExpressionBuilder.toString());
+            queryRequestBuilder.filterExpression(filterExpressionBuilder.toString());
         }
 
-        final QueryResult queryResult = dynamoDBClient.query(queryRequest);
+        final QueryResponse queryResult = dynamoDbClient.query(queryRequestBuilder.build());
 
         final StringBuilder response = new StringBuilder();
         response.append("PK of items read with query (V2): ");
-        for (Map<String, AttributeValue> item : queryResult.getItems()) {
+        for (Map<String, AttributeValue> item : queryResult.items()) {
             response.append(prepareKeyStr(item, request));
         }
-
 
         return new Response(response.toString(), null);
     }
 
     @Override
     public final Response scan(final Request request) {
-
         final String projectionExpression = request.getPartitionKey() + ", " + request.getSortKey();
-        ScanRequest scanRequest = new ScanRequest()
-                .withTableName(request.getTableName())
-                .withProjectionExpression(projectionExpression);
 
-        StringBuilder filterExpressionBuilder;
-        Map<String, AttributeValue> expressionAttributeValues;
+        ScanRequest.Builder scanRequestBuilder = ScanRequest.builder()
+                .tableName(request.getTableName())
+                .projectionExpression(projectionExpression);
+
         if (request.getFilterData() != null) {
-            filterExpressionBuilder = new StringBuilder();
-            expressionAttributeValues = new HashMap<>();
+            StringBuilder filterExpressionBuilder = new StringBuilder();
+            Map<String, AttributeValue> expressionAttributeValues = new HashMap<>();
             processFilterData(request, filterExpressionBuilder, expressionAttributeValues);
-            // Add to ScanRequest.
-            scanRequest.withFilterExpression(filterExpressionBuilder.toString());
-            scanRequest.withExpressionAttributeValues(expressionAttributeValues);
+            scanRequestBuilder
+                .filterExpression(filterExpressionBuilder.toString())
+                .expressionAttributeValues(expressionAttributeValues);
         }
 
-
-
-        final ScanResult scanResult = dynamoDBClient.scan(scanRequest);
+        final ScanResponse scanResult = dynamoDbClient.scan(scanRequestBuilder.build());
 
         final StringBuilder response = new StringBuilder();
         response.append("PK of items read with scan (V2): ");
-        for (Map<String, AttributeValue> item : scanResult.getItems()) {
+        for (Map<String, AttributeValue> item : scanResult.items()) {
             response.append(prepareKeyStr(item, request));
         }
 
@@ -126,8 +120,7 @@ public class DynamoDBServiceImpl2 implements DynamoDBService {
                 filterExpressionBuilder.append(" and ");
             }
             filterExpressionBuilder.append(k + "=" + var);
-            expressionAttributeValues.put(var, new AttributeValue(v));
+            expressionAttributeValues.put(var, AttributeValue.builder().s(v).build());
         });
     }
-
 }

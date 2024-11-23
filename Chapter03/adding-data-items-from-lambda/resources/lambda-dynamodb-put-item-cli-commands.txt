@@ -1,22 +1,22 @@
 aws s3 cp \
 target/lambda-dynamodb-put-item-0.0.1-SNAPSHOT.jar \
-s3://serverless-cookbook/lambda-dynamodb-put-item-0.0.1-SNAPSHOT.jar \
+s3://dev-for-tw-robert-20241020/lambda-dynamodb-put-item-0.0.1-SNAPSHOT.jar \
 --profile admin
 
 aws cloudformation create-stack \
-    --stack-name myteststack-p \
+    --stack-name ch03stack-p \
     --template-body file://lambda-dynamodb-put-item-cf-template.yml \
     --capabilities CAPABILITY_NAMED_IAM \
     --region us-east-1 \
     --profile admin
 
 aws cloudformation describe-stacks \
-    --stack-name myteststack-p \
+    --stack-name ch03stack-p \
     --region us-east-1 \
     --profile admin
 
 aws cloudformation delete-stack \
-    --stack-name myteststack-p \
+    --stack-name ch03stack-p \
     --region us-east-1 \
     --profile admin
 
@@ -24,6 +24,7 @@ aws lambda invoke \
     --invocation-type RequestResponse \
     --function-name lambda-dynamodb-put-item \
     --log-type Tail \
+    --cli-binary-format raw-in-base64-out \
     --payload '{
                     "tableName":"my_table",
                     "partitionKey": "id",
