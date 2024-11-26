@@ -1,7 +1,7 @@
 # Web Hosting with S3, Route53, and CloudFront
  This chapter will cover the following topics:
 * [Setting up an S3 static website](./setting-up-s3-static-website/README.md)
-* [Setting up CloudFront for an S3 website](./setting-up-cloudfront-for-s3-bucket/)
+* [Setting up CloudFront for an S3 website](./setting-up-cloudfront-for-s3-bucket/README.md)
 * [Registering a domain with Route 53](./registering-domain-name-with-route53/)
 * Using domains registered with other registrars
 * Creating a custom domain with an S3 static website 
