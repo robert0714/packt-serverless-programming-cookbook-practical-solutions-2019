@@ -114,7 +114,7 @@ We will now create a user pool using CLI commands. In the next section, we will 
             --role-name cognito_sns_iam_role \
             --policy-arn arn:aws:iam::937197674655:policy/cognito_sns_iam_policy \ 
         ``` 
-2. Generate the input JSON template by using the `generate-cli-skeleton` option, and fill in the properties that are required within the JSON file (remove the properties that are not required). 
+2. Generate the input [JSON template](https://docs.aws.amazon.com/zh_tw/cli/v1/userguide/cli-usage-skeleton.html) by using the [`generate-cli-skeleton` option](resources/congnito-user-and-client-cli-commands.txt), and fill in the properties that are required within the JSON file (remove the properties that are not required). 
    1. We will start the JSON file by specifying a name, using the `PoolName` property:
         ```json   
         {
