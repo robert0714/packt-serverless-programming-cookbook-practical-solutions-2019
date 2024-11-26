@@ -42,20 +42,34 @@ We will now create a user pool using CLI commands. In the next section, we will 
             --policy-name cognito_sns_iam_policy \
             --policy-document file://resources/sns-publish-policy.txt \
             --profile admin
+        {
+            "Policy": {
+                "PolicyName": "cognito_sns_iam_policy",
+                "PolicyId": "ANPA5UNKVUCP2VHWXDT34",
+                "Arn": "arn:aws:iam::937197674655:policy/cognito_sns_iam_policy",
+                "Path": "/",
+                "DefaultVersionId": "v1",
+                "AttachmentCount": 0,
+                "PermissionsBoundaryUsageCount": 0,
+                "IsAttachable": true,
+                "CreateDate": "2024-11-26T06:17:37+00:00",
+                "UpdateDate": "2024-11-26T06:17:37+00:00"
+            }
+        }
         ```
    3. Create a trust relationship document for the role, as follows:
         ```json   
         {
-        "Version": "2012-10-17",
-        "Statement": [
-            {
-            "Effect": "Allow",
-            "Principal": {
-                "Service": "cognito-idp.amazonaws.com"
-            },
-            "Action": "sts:AssumeRole"
-            }
-        ]
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                "Effect": "Allow",
+                "Principal": {
+                    "Service": "cognito-idp.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole"
+                }
+            ]
         }
         ```
         Save this as `assume-role-trust-relationship-policy-document.txt`.
@@ -65,14 +79,40 @@ We will now create a user pool using CLI commands. In the next section, we will 
             --role-name cognito_sns_iam_role \
             --assume-role-policy-document file://resources/assume-role-trust-relationship-policy-document.txt \
             --profile admin
+        {
+            "Role": {
+                "Path": "/",
+                "RoleName": "cognito_sns_iam_role",
+                "RoleId": "AROA5UNKVUCPSCUZGT36P",
+                "Arn": "arn:aws:iam::937197674655:role/cognito_sns_iam_role",
+                "CreateDate": "2024-11-26T06:21:17+00:00",
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "cognito-idp.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                }
+            }
+        }       
         ```    
         Note the role ARN.
-   5. Attach the policy to the role, as follows:
+   5. Attach the <font color=red>policy to the role</font>, as follows:
         ```bash
         aws iam attach-role-policy \
         --role-name cognito_sns_iam_role \
         --policy-arn arn:aws:iam::<account_id>:policy/cognito_sns_iam_policy \
         --profile admin
+
+
+        aws iam attach-role-policy \
+            --role-name cognito_sns_iam_role \
+            --policy-arn arn:aws:iam::937197674655:policy/cognito_sns_iam_policy \ 
         ``` 
 2. Generate the input JSON template by using the `generate-cli-skeleton` option, and fill in the properties that are required within the JSON file (remove the properties that are not required). 
    1. We will start the JSON file by specifying a name, using the `PoolName` property:
@@ -80,7 +120,7 @@ We will now create a user pool using CLI commands. In the next section, we will 
         {
         "PoolName": "QnaTime.com User Pool",
         ```  
-      `QnaTime.com` is a domain that is bought in Chapter 5, [Web Hosting with S3, Route 53, and CloudFront](../../Chapter05/) .
+      `QnaTime.com` is <font color=red>a domain that is bought in Chapter 5</font>, [Web Hosting with S3, Route 53, and CloudFront](../../Chapter05/) .
    2. Under the `Policies` section, we will define the password policy, using the `PasswordPolicy` sub-property:
         ```json   
         "Policies": {
@@ -114,8 +154,8 @@ We will now create a user pool using CLI commands. In the next section, we will 
    6. Define the SMS configuration, as follows:
         ```json   
         "SmsConfiguration": {
-        "SnsCallerArn": "arn:aws:iam::855923912133:role/cognito_sns_iam_role",
-        "ExternalId": "some-unique-external-id-preferably-a-uuid"
+             "SnsCallerArn": "arn:aws:iam::855923912133:role/cognito_sns_iam_role",
+             "ExternalId": "some-unique-external-id-preferably-a-uuid"
         },
         ```
         Here, `SnsCallerArn` is the ARN of the role that you created in the previous step. The external ID is a unique external ID. If you are creating the user pool from the Management Console, AWS will generate a UUID value for this field.
