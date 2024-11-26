@@ -267,9 +267,22 @@ Creating Cognito user pools is more commonly done using CloudFormation templates
     ```      
     The complete CloudFormation template is available in the code files.
 10. Execute the CloudFormation template to create a CloudFormation stack.
+    ```bash
+    aws cloudformation create-stack \
+        --stack-name userpoolandclientstack \
+        --template-body file://create-user-pool-and-client-cf-template.yml \
+        --capabilities CAPABILITY_NAMED_IAM 
+    ```
 11. You can run the `describe-stacks` sub-command to get the status and the `user-pool-id`. You can also use the `describe-user-pool` sub-command with the ID returned by the `describe-stacks` sub-command, in order to verify the new Cognito user pool.
+    ```bash
+    aws cloudformation describe-stacks \
+        --stack-name userpoolandclientstack  
+    ```
 12. To clean up, you can delete the user pool by deleting the stack, or you can keep the stack.
-
+    ```bash
+    aws cloudformation delete-stack \
+        --stack-name userpoolandclientstack  
+    ```
 
 ### User sign-up with SMS and MFA verification
 First, we will set up a user pool client for SMS verification; then, we will do user sign-up with SMS verification:
