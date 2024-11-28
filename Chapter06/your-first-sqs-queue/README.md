@@ -19,6 +19,10 @@ aws sqs create-queue \
 ```
 If successful, this will give the output shown here:
 ```json
+{
+    "QueueUrl": "https://sqs.ap-northeast-1.amazonaws.com/937197674655/my-first-queue"
+}
+
 ```
 #### The CloudFormation template
 You can create a CloudFormation template file with the following Resources and Output sections to create a simple SQS queue with defaults:
@@ -43,6 +47,19 @@ You may also add a template version and description.
 
 If stack creation (run using `aws cloudformation create-stack`) is successful, the `describe` command (run using `aws cloudformation describe-stacks`) will return a response with the `Output` section, as follows:
 ```json
+            "Outputs": [
+                {
+                    "OutputKey": "SQSQueueArn",
+                    "OutputValue": "arn:aws:sqs:ap-northeast-1:937197674655:my-first-sqs-queue-cf",
+                    "ExportName": "SQSQueueArn"
+                },
+                {
+                    "OutputKey": "SQSQueueURL",
+                    "OutputValue": "https://sqs.ap-northeast-1.amazonaws.com/937197674655/my-first-sqs-queue-cf",
+                    "ExportName": "SQSQueueURL"
+                }
+            ],
+
 ```
 ### Sending and receiving data (AWS CLI)
 1. We can send data to an AWS queue from the command line, as follows:
@@ -54,6 +71,10 @@ If stack creation (run using `aws cloudformation create-stack`) is successful, t
     ```    
     This command will return a response, as follows:
     ```json
+    {
+        "MD5OfMessageBody": "fafb00f5732ab283681e124bf8747ed1",
+        "MessageId": "8504a6f2-e700-406e-855e-86c975c79ad9"
+    }
     ```
 
 2. We can get data from an AWS queue from the command line, as follows:
@@ -64,6 +85,17 @@ If stack creation (run using `aws cloudformation create-stack`) is successful, t
     ```    
     This command will return a response, as follows:
     ```json
+    {
+        "Messages": [
+            {
+                "MessageId": "8504a6f2-e700-406e-855e-86c975c79ad9",
+                "ReceiptHandle": "AQEBo0UYfE969gVRpPBpEZrMBtAqv9obpTrnXldrkufdCYJhfwy4O4CT9k5VQVvv4XiiJs4IEl6M8ZYevs/2I4JVBTFbXrh5/7f10O12MEoFFpsg1x0z+zwJ0fyXDBkicTmUdg0H5K5y0brIkSlq+eFSVuniNJUBmYUBm7Vxi/+N4AFnwXiFItfXnJByCheknn5LcjTVLG1In1a2UaE1TSPKYxEiZKwG2XW6zx+jqVUIOkWtwC4HG4lGgZZMfPC1LCsmKuKx70GpnBPo6eijDezOLWWm4U4hXH/2DsfdnGv+V+3xmnG+xATn0enQfjbkYMcb+ejtpVhV6
+    nQkQ070nFTIJl5d25j7/e8Jh4TVcwCKKlpSCEA2O7XOD/V5vz2dlFa6l8zyjDyJFfmvVRtoSXCIAA==",
+                "MD5OfBody": "fafb00f5732ab283681e124bf8747ed1",
+                "Body": "This is a test message"
+            }
+        ]
+    }
     ```
 
 ## How it works...
