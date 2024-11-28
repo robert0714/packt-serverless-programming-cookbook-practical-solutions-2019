@@ -2,7 +2,7 @@
 This chapter will cover the following topics:
 * [Your first SQS queue (AWS CLI + CloudFormation)](./your-first-sqs-queue/README.md)
 * [Creating an SQS queue and sending messages with SDK (Java)](./creating-sqs-queue-and-sending-message-with-sdk/README.md)
-* [Receiving and sending SQS messages in batches with SDK (Java)](./receiving-and-sending-sqs-messages-in-batch-with-sdk/)
+* [Receiving and sending SQS messages in batches with SDK (Java)](./receiving-and-sending-sqs-messages-in-batch-with-sdk/README.md)
 * [Invoking Lambda with SQS events (Java)](./invoking-lambda-with-sqs-event/)
 * [Your first SNS topic for email and SMS (AWS CLI + CloudFormation)](./your-first-sqs-queue/)
 * [Publishing to SNS topic with SDK (Java)](./publishing-to-sns-topic-with-sdk/)
