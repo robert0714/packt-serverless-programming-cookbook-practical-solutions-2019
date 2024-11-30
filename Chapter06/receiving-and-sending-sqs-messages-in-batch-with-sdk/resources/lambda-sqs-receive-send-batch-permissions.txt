@@ -5,9 +5,10 @@
          "Effect":"Allow",
          "Action":[
             "sqs:ReceiveMessage",
-            "sqs:SendMessage",
-            "sqs:SendMessageBatch",
-            "sqs:DeleteQueue"
+				"sqs:SendMessage",
+				"sqs:SendMessage",
+				"sqs:DeleteQueue",
+				"sqs:DeleteMessage"
          ],
          "Resource":[
             "arn:aws:sqs:*:*:*"
