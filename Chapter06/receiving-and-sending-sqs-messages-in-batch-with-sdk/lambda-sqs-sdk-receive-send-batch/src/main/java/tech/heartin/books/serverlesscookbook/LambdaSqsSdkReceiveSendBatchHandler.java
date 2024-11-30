@@ -3,8 +3,9 @@ package tech.heartin.books.serverlesscookbook;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.regions.Region;
+ 
 import tech.heartin.books.serverlesscookbook.domain.Request;
 import tech.heartin.books.serverlesscookbook.domain.Response;
 import tech.heartin.books.serverlesscookbook.services.SqsService;
@@ -16,14 +17,13 @@ import tech.heartin.books.serverlesscookbook.services.SqsServiceImpl;
 public final class LambdaSqsSdkReceiveSendBatchHandler implements RequestHandler<Request, Response> {
 
 
-    private final AmazonSQS sqsClient;
+    private final SqsClient sqsClient;
 
     public LambdaSqsSdkReceiveSendBatchHandler() {
-        this.sqsClient = AmazonSQSClientBuilder.standard()
-                .withRegion(System.getenv("AWS_REGION"))
+        this.sqsClient = SqsClient.builder()
+                .region(Region.of(System.getenv("AWS_REGION")))
                 .build();
     }
-
     /**
      * Handle request.
      *
