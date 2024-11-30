@@ -1,10 +1,13 @@
 package tech.heartin.books.serverlesscookbook.services;
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.model.AmazonSQSException;
-import com.amazonaws.services.sqs.model.CreateQueueResult;
-import com.amazonaws.services.sqs.model.SendMessageRequest;
+
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
+import software.amazon.awssdk.services.sqs.model.CreateQueueResponse;
+import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 import tech.heartin.books.serverlesscookbook.domain.Request;
 import tech.heartin.books.serverlesscookbook.domain.Response;
@@ -14,9 +17,9 @@ import tech.heartin.books.serverlesscookbook.domain.Response;
  */
 public class SqsServiceImpl implements SqsService {
 
-    private final AmazonSQS sqsClient;
+    private final SqsClient  sqsClient;
 
-    public SqsServiceImpl(final AmazonSQS sqsClient) {
+    public SqsServiceImpl(final SqsClient  sqsClient) {
         this.sqsClient = sqsClient;
     }
 
@@ -26,27 +29,41 @@ public class SqsServiceImpl implements SqsService {
         String errorMessage;
 
         try {
-            CreateQueueResult createResult = this.sqsClient.createQueue(request.getQueueName());
-            logger.log("Created queue: " + createResult.getQueueUrl());
+            CreateQueueRequest createQueueRequest = CreateQueueRequest.builder()
+                    .queueName(request.getQueueName())
+                    .build();
 
-        } catch (AmazonSQSException e) {
+            CreateQueueResponse createQueueResponse = this.sqsClient.createQueue(createQueueRequest);
+            logger.log("Created queue: " +  createQueueResponse.queueUrl());
 
-            if (e.getErrorCode().equals("QueueAlreadyExists")) {
+        } catch (SdkException e) {
+
+            if (e.getMessage().contains("QueueAlreadyExists")) {
                 errorMessage = "QueueAlreadyExists: " + request.getQueueName();
             } else {
-                errorMessage = "Error during queue creation: " + e.getErrorCode();
+                errorMessage = "Error during queue creation: " + e.getMessage();
             }
 
             logger.log(errorMessage);
             return new Response(errorMessage);
         }
 
-        final String queueUrl = this.sqsClient.getQueueUrl(request.getQueueName()).getQueueUrl();
+        String queueUrl;
+        try {
+            queueUrl = this.sqsClient.getQueueUrl(GetQueueUrlRequest.builder()
+                    .queueName(request.getQueueName())
+                    .build()).queueUrl();
+        } catch (SdkException e) {
+            errorMessage = "Error fetching queue URL: " + e.getMessage();
+            logger.log(errorMessage);
+            return new Response(errorMessage);
+        }
 
-        final SendMessageRequest sendMessageRequest = new SendMessageRequest()
-                .withQueueUrl(queueUrl)
-                .withMessageBody(request.getMessage())
-                .withDelaySeconds(5);
+        SendMessageRequest sendMessageRequest = SendMessageRequest.builder()
+                .queueUrl(queueUrl)
+                .messageBody(request.getMessage())
+                .delaySeconds(5)
+                .build();
         try {
             this.sqsClient.sendMessage(sendMessageRequest);
         } catch (Exception e) {

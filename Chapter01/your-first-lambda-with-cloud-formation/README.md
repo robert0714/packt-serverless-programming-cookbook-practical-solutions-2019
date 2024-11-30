@@ -7,7 +7,7 @@ You need to read and follow to the **Getting ready** section of the recipes *You
 ## Set up the project and S3 bucket
 In this recipe, we are reusing the Lambda we created in the *Your Lambda with AWS CLI* recipe. Generate a JAR by running `mvn clean package `inside that project, and upload the JAR to S3:
 ```bash
-aws s3 cp target/original-serverless-cookbook-lambda-handler-with-pojos-0.0.1-SNAPSHOT.jar s3://serverless-cookbook/lambda-handler-with-pojos-0.0.1-SNAPSHOT.jar --profile admin
+aws s3 cp target/original-serverless-cookbook-lambda-handler-with-pojos-0.0.1-SNAPSHOT.jar s3://dev-for-tw-robert-20241020/lambda-handler-with-pojos-0.0.1-SNAPSHOT.jar --profile admin
 ```
 Replace the bucket name `serverless-cookbook` with your bucket's name. Refer to the Getting ready section of the recipe *Your First AWS CLI* to create the S3 bucket.
 

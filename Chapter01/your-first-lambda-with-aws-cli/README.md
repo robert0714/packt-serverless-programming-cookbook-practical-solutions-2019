@@ -22,7 +22,7 @@ Replace the <bucket name> with your bucket's name. Remember that the S3 bucket n
    * We can generate JARs by running `mvn clean package`. Two JARs are created: one with only class files (starting with `original-`) and an Uber JAR with dependencies (starting with `serverless-`). In this recipe, we will use the original JAR.
 1. Upload the JAR file to your S3 bucket using AWS CLI:
    ```bash
-   aws s3 cp target/original-serverless-cookbook-lambda-handler-with-pojos-0.0.1-SNAPSHOT.jar s3://serverless-cookbook/lambda-handler-with-pojos-0.0.1-SNAPSHOT.jar --profile admin
+   aws s3 cp target/original-serverless-cookbook-lambda-handler-with-pojos-0.0.1-SNAPSHOT.jar s3://dev-for-tw-robert-20241020/lambda-handler-with-pojos-0.0.1-SNAPSHOT.jar --profile admin
    ```
    > Replace the bucket name serverless-cookbook with your bucket's name. We saw the steps to create a bucket in the Getting ready section. Also, --profile admin is the profile we created in the Getting ready section.
 1. Create a policy with the aws iam create-policy command:

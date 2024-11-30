@@ -4,8 +4,8 @@
       {
          "Effect":"Allow",
          "Action":[
-            sqs:CreateQueue,
-            sqs:GetQueueUrl,
+            "sqs:CreateQueue",
+            "sqs:GetQueueUrl",
             "sqs:SendMessage"
          ],
          "Resource":[

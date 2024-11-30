@@ -22,7 +22,7 @@ Follow this steps to deploy and invoke the Lambda. You may follow Chapter 1, Get
     ```bash
     aws s3 cp \
         target/lambda-sqs-sdk-receive-send-batch-0.0.1-SNAPSHOT.jar \
-        s3://serverless-cookbook/lambda-sqs-sdk-receive-send-batch-0.0.1-SNAPSHOT.jar \
+        s3://dev-for-tw-robert-20241020/lambda-sqs-sdk-receive-send-batch-0.0.1-SNAPSHOT.jar \
         --profile admin
     ```    
 3. Create a role for the Lambda with an appropriate trust relationship definition:

@@ -4,7 +4,7 @@ cd lambda-alexa-simple-intro
 
 aws s3 cp \
     target/lambda-alexa-simple-intro-0.0.1-SNAPSHOT.jar \
-    s3://serverless-cookbook/lambda-alexa-simple-intro-0.0.1-SNAPSHOT.jar \
+    s3://dev-for-tw-robert-20241020/lambda-alexa-simple-intro-0.0.1-SNAPSHOT.jar \
     --profile admin
 
 cd ..
