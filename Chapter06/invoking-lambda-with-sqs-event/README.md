@@ -15,7 +15,90 @@ Before we can invoke our Lambda, we need to create an input and an output queue.
 
 Perform the following:
 1. Create two SQS queues: an input queue, `my-input-queue`, and an output queue, `my-output-queue`, following the [Your first SQS queue](../your-first-sqs-queue/README.md) recipe
+    ```bash
+    aws sqs create-queue \
+        --queue-name 'my-input-queue' \
+        --profile admin
+    {
+        "QueueUrl": "https://sqs.ap-northeast-1.amazonaws.com/937197674655/my-input-queue"
+    }
+
+
+    aws sqs create-queue \
+        --queue-name 'my-output-queue' \
+        --profile admin
+    {
+        "QueueUrl": "https://sqs.ap-northeast-1.amazonaws.com/937197674655/my-output-queue"
+    }
+    ```
 2. Send six to seven messages into the queue from CLI
+    ```bash
+    aws sqs send-message \
+        --queue-url https://queue.amazonaws.com/937197674655/my-input-queue \
+        --message-body 'This is test message 1' \
+        --profile admin
+    {
+        "MD5OfMessageBody": "246ff47f61c75f9aaf1d07bcd6c0d2d4",
+        "MessageId": "7ee7299d-c3e6-4a06-8279-1fc90ebb167a"
+    }
+    
+
+    aws sqs send-message \
+        --queue-url https://queue.amazonaws.com/937197674655/my-input-queue \
+        --message-body 'This is test message 2' \
+        --profile admin
+    {
+        "MD5OfMessageBody": "29ceb3b2564689646d593962604ff1e3",
+        "MessageId": "8922e111-3969-4635-8b97-8f93eb156711"
+    }
+
+
+    aws sqs send-message \
+        --queue-url https://queue.amazonaws.com/937197674655/my-input-queue \
+        --message-body 'This is test message 3' \
+        --profile admin
+    {
+        "MD5OfMessageBody": "a74919a3c03768a752425d32ad7beaa6",
+        "MessageId": "7610c265-eff2-434d-a5d4-c3da2ca2fc75"
+    }
+
+    aws sqs send-message \
+        --queue-url https://queue.amazonaws.com/937197674655/my-input-queue \
+        --message-body 'This is test message 4' \
+        --profile admin
+    {
+        "MD5OfMessageBody": "9e8297d7c4d5e90158bcacb7645870d6",
+        "MessageId": "86eab4be-9043-48b5-b9c4-8214c1be776e"
+    }
+
+    aws sqs send-message \
+        --queue-url https://queue.amazonaws.com/937197674655/my-input-queue \
+        --message-body 'This is test message 5' \
+        --profile admin
+    {
+        "MD5OfMessageBody": "12b71e7ae4d41fb52089474ece7684ff",
+        "MessageId": "680d7ad7-e32a-4392-b2f1-016912e934aa"
+    }
+
+    aws sqs send-message \
+        --queue-url https://queue.amazonaws.com/937197674655/my-input-queue \
+        --message-body 'This is test message 6' \
+        --profile admin
+    {
+        "MD5OfMessageBody": "721d1b00ea8d915bfaab3c0607c2c8e7",
+        "MessageId": "b45f4a47-c9a4-4834-a797-59c0cad1af20"
+    }
+
+    aws sqs send-message \
+        --queue-url https://queue.amazonaws.com/937197674655/my-input-queue \
+        --message-body 'This is test message 7' \
+        --profile admin
+    {
+        "MD5OfMessageBody": "f4803193337c4beea27cddf1ecfe9d54",
+        "MessageId": "a2788035-035b-446a-81e3-0ffd293aa222"
+    }
+    ```
+
 
 
 ### Provisioning the Lambda (AWS CLI)
@@ -35,43 +118,88 @@ Follow these steps to deploy and invoke the Lambda. You may follow Chapter 1, [G
         --role-name lambda-invoke-sqs-event-role \
         --assume-role-policy-document file://iam-role-trust-relationship.txt \
         --profile admin
+    {
+        "Role": {
+            "Path": "/",
+            "RoleName": "lambda-invoke-sqs-event-role",
+            "RoleId": "AROA5UNKVUCPZBI2GWGOO",
+            "Arn": "arn:aws:iam::937197674655:role/lambda-invoke-sqs-event-role",
+            "CreateDate": "2024-12-01T10:04:13+00:00",
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": "lambda.amazonaws.com"
+                        },
+                        "Action": "sts:AssumeRole"
+                    }
+                ]
+            }
+        }
+    }
     ```    
     The trust document, `iam-role-trust-relationship.txt`, is defined as follows:
     ```json
     {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-        "Effect": "Allow",
-        "Principal": {
-            "Service": "lambda.amazonaws.com"
-        },
-        "Action": "sts:AssumeRole"
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "lambda.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+            }
+        ]
         }
-    ]
-    }
     ```
 4. Create a policy for basic logging permissions and attach it to the role
+    ```bash
+    aws iam create-policy \
+        --policy-name lambda-basic-iam-policy \
+        --policy-document file://basic-lambda-permissions.txt
+    {
+        "Policy": {
+            "PolicyName": "lambda-basic-iam-policy",
+            "PolicyId": "ANPA5UNKVUCPW5EO2FLEL",
+            "Arn": "arn:aws:iam::937197674655:policy/lambda-basic-iam-policy",
+            "Path": "/",
+            "DefaultVersionId": "v1",
+            "AttachmentCount": 0,
+            "PermissionsBoundaryUsageCount": 0,
+            "IsAttachable": true,
+            "CreateDate": "2024-12-01T10:01:41+00:00",
+            "UpdateDate": "2024-12-01T10:01:41+00:00"
+        }
+    }
+
+    aws iam attach-role-policy \
+        --role-name lambda-invoke-sqs-event-role \
+        --policy-arn arn:aws:iam::937197674655:policy/lambda-basic-iam-policy \
+        --profile admin
+    ```
 5. Create a policy for required SQS permissions and attach it to the role
     The policy document with required SQS permissions is shown here:
     ```json
     {
-    "Version":"2012-10-17",
-    "Statement":[
-        {
-            "Effect":"Allow",
-            "Action":[
-                "sqs:GetQueueAttributes",
-                "sqs:ReceiveMessage",
-                "sqs:DeleteMessage",
-                "sqs:SendMessage",
-                "sqs:SendMessageBatch"
-            ],
-            "Resource":[
-                "arn:aws:sqs:*:*:*"
-            ]
-        }
-    ]
+        "Version":"2012-10-17",
+        "Statement":[
+            {
+                "Effect":"Allow",
+                "Action":[
+                    "sqs:GetQueueAttributes",
+                    "sqs:ReceiveMessage",
+                    "sqs:DeleteMessage",
+                    "sqs:SendMessage",
+                    "sqs:SendMessageBatch"
+                ],
+                "Resource":[
+                    "arn:aws:sqs:*:*:*"
+                ]
+            }
+        ]
     }
     ```
     A Lambda configured to be invoked by an SQS even source should have the following permissions:
@@ -79,28 +207,108 @@ Follow these steps to deploy and invoke the Lambda. You may follow Chapter 1, [G
     * sqs:ReceiveMessage
     * sqs:DeleteMessage
     I have also added the send message permissions, as we will be forwarding the messages to another queue
+    ```bash
+    aws iam create-policy \
+        --policy-name lambda-invoke-sqs-event-policy \
+        --policy-document file://lambda-invoke-sqs-event-permissions.txt \
+        --profile admin
+    {
+        "Policy": {
+            "PolicyName": "lambda-invoke-sqs-event-policy",
+            "PolicyId": "ANPA5UNKVUCPS5BL7OD5J",
+            "Arn": "arn:aws:iam::937197674655:policy/lambda-invoke-sqs-event-policy",
+            "Path": "/",
+            "DefaultVersionId": "v1",
+            "AttachmentCount": 0,
+            "PermissionsBoundaryUsageCount": 0,
+            "IsAttachable": true,
+            "CreateDate": "2024-12-01T10:08:58+00:00",
+            "UpdateDate": "2024-12-01T10:08:58+00:00"
+        }
+    }
 
+    aws iam attach-role-policy \
+        --role-name lambda-invoke-sqs-event-role \
+        --policy-arn arn:aws:iam::937197674655:policy/lambda-invoke-sqs-event-policy \
+        --profile admin
+    ```
 6. Create the Lambda function, as shown here:
     ```bash
     aws lambda create-function \
         --function-name lambda-invoke-sqs-event \
-        --runtime java8 \
-        --role arn:aws:iam::855923912133:role/lambda-invoke-sqs-event-role \
+        --runtime java17 \
+        --role arn:aws:iam::937197674655:role/lambda-invoke-sqs-event-role \
         --handler tech.heartin.books.serverlesscookbook.LambdaSqsEventHandler::handleRequest \
         --code S3Bucket=serverless-cookbook,S3Key=lambda-invoke-sqs-event-0.0.1-SNAPSHOT.jar \
-        --environment Variables={SPC_OUTPUT_QUEUE_URL='https://queue.amazonaws.com/855923912133/my-output-queue'} \
+        --environment Variables={SPC_OUTPUT_QUEUE_URL='https://queue.amazonaws.com/937197674655/my-output-queue'} \
         --timeout 15 \
         --memory-size 512 \
         --region us-east-1 \
         --profile admin
+    {
+        "FunctionName": "lambda-invoke-sqs-event",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:937197674655:function:lambda-invoke-sqs-event",
+        "Runtime": "java17",
+        "Role": "arn:aws:iam::937197674655:role/lambda-invoke-sqs-event-role",
+        "Handler": "tech.heartin.books.serverlesscookbook.LambdaSqsEventHandler::handleRequest",
+        "CodeSize": 11178041,
+        "Description": "",
+        "Timeout": 15,
+        "MemorySize": 512,
+        "LastModified": "2024-12-01T10:12:09.467+0000",
+        "CodeSha256": "YEUWvmQzW+S0xZIveNNEgVbtOgcgJ5X11MqlR3+BFvo=",
+        "Version": "$LATEST",
+        "Environment": {
+            "Variables": {
+                "SPC_OUTPUT_QUEUE_URL": "https://queue.amazonaws.com/937197674655/my-output-queue"
+            }
+        },
+        "TracingConfig": {
+            "Mode": "PassThrough"
+        },
+        "RevisionId": "51c16bfe-83a2-4df6-8188-63ba2f196953",
+        "State": "Pending",
+        "StateReason": "The function is being created.",
+        "StateReasonCode": "Creating",
+        "PackageType": "Zip",
+        "Architectures": [
+            "x86_64"
+        ],
+        "EphemeralStorage": {
+            "Size": 512
+        },
+        "SnapStart": {
+            "ApplyOn": "None",
+            "OptimizationStatus": "Off"
+        },
+        "RuntimeVersionConfig": {
+            "RuntimeVersionArn": "arn:aws:lambda:ap-northeast-1::runtime:5b9b2cfd05dd0cba22f79278aa11976651792d65fdc56d6bbda8271221739ad8"
+        },
+        "LoggingConfig": {
+            "LogFormat": "Text",
+            "LogGroup": "/aws/lambda/lambda-invoke-sqs-event"
+        }
+    }
     ```    
 7. Configure an SQS event source for the Lambda:
     ```bash
     aws lambda create-event-source-mapping \
-        --event-source-arn arn:aws:sqs:us-east-1:855923912133:my-input-queue \
+        --event-source-arn arn:aws:sqs:ap-northeast-1:937197674655:my-input-queue \
         --function-name lambda-invoke-sqs-event \
         --batch-size 4 \
         --profile admin
+    {
+        "UUID": "8da7d3eb-e819-43b1-826d-b74e4621f9b2",
+        "BatchSize": 4,
+        "MaximumBatchingWindowInSeconds": 0,
+        "EventSourceArn": "arn:aws:sqs:ap-northeast-1:937197674655:my-input-queue",
+        "FunctionArn": "arn:aws:lambda:ap-northeast-1:937197674655:function:lambda-invoke-sqs-event",
+        "LastModified": "2024-12-01T18:14:57.587000+08:00",
+        "State": "Creating",
+        "StateTransitionReason": "USER_INITIATED",
+        "FunctionResponseTypes": [],
+        "EventSourceMappingArn": "arn:aws:lambda:ap-northeast-1:937197674655:event-source-mapping:8da7d3eb-e819-43b1-826d-b74e4621f9b2"
+    }
     ```    
     The `batch-size` parameter specifies the maximum number of messages to be retrieved from the queue together
 
@@ -110,7 +318,7 @@ Follow these steps to deploy and invoke the Lambda. You may follow Chapter 1, [G
 2. Verify the invocation by retrieving the message from the queue:
     ```bash
     aws sqs receive-message \
-        --queue-url https://queue.amazonaws.com/855923912133/my-output-queue \
+        --queue-url https://queue.amazonaws.com/937197674655/my-output-queue \
         --max-number-of-messages 5 \
         --profile admin
     ```    
