@@ -2,10 +2,10 @@ package tech.heartin.books.serverlesscookbook;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSClientBuilder;
-import com.amazonaws.services.sns.model.PublishRequest;
-import com.amazonaws.services.sns.model.PublishResult;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.PublishResponse;
 
 import tech.heartin.books.serverlesscookbook.domain.Request;
 
@@ -14,12 +14,12 @@ import tech.heartin.books.serverlesscookbook.domain.Request;
  */
 public final class LambdaSnsPublishHandler implements RequestHandler<Request, String> {
 
-    private final AmazonSNS snsClient;
+    private final SnsClient  snsClient;
 
     public LambdaSnsPublishHandler() {
-        this.snsClient = AmazonSNSClientBuilder.standard()
-                .withRegion(System.getenv("AWS_REGION"))
-                .build();
+        this.snsClient = SnsClient.builder()
+              .region(Region.of(System.getenv("AWS_REGION")))
+              .build();
     }
 
     /**
@@ -32,14 +32,17 @@ public final class LambdaSnsPublishHandler implements RequestHandler<Request, St
     public String handleRequest(final Request request, final Context context) {
         context.getLogger().log("Received Request: " + request);
 
-        final PublishResult result;
+        final PublishResponse  result;
         try {
-            PublishRequest publishRequest = new PublishRequest(request.getTopicArn(), request.getMessage());
+            PublishRequest publishRequest = PublishRequest.builder()
+                .topicArn(request.getTopicArn())
+                .message(request.getMessage())
+                .build();
             result = snsClient.publish(publishRequest);
         } catch (Exception e) {
             return "Exception occurred: " + e.getMessage();
         }
 
-        return "Message Id: " + result.getMessageId();
+        return "Message Id: " + result.messageId();
     }
 }
