@@ -6,18 +6,19 @@ import java.util.Collection;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent.SNSRecord;
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.model.SendMessageBatchRequest;
-import com.amazonaws.services.sqs.model.SendMessageBatchRequestEntry;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse;
 
 /**
  * Implementation class for SnsService.
  */
 public class SnsServiceImpl implements SnsService {
 
-    private final AmazonSQS sqsClient;
+    private final SqsClient sqsClient;
 
-    public SnsServiceImpl(final AmazonSQS sqsClient) {
+    public SnsServiceImpl(final SqsClient sqsClient) {
         this.sqsClient = sqsClient;
     }
 
@@ -33,14 +34,25 @@ public class SnsServiceImpl implements SnsService {
             int idVal = 1;
             for (SNSRecord r : event.getRecords()) {
                 logger.log("Adding message: " + r.getSNS().getMessage());
-                entries.add(new SendMessageBatchRequestEntry("id_" + idVal, r.getSNS().getMessage()));
+                entries.add(SendMessageBatchRequestEntry.builder()
+                        .id("id_" + idVal)
+                        .messageBody(r.getSNS().getMessage())
+                        .build());
                 idVal++;
             }
 
-            final SendMessageBatchRequest sendBatchRequest = new SendMessageBatchRequest()
-                    .withQueueUrl(outputQueueURL)
-                    .withEntries(entries);
-            this.sqsClient.sendMessageBatch(sendBatchRequest);
+            SendMessageBatchRequest sendBatchRequest = SendMessageBatchRequest.builder()
+                        .queueUrl(outputQueueURL)
+                        .entries(entries)
+                        .build();
+            SendMessageBatchResponse response = sqsClient.sendMessageBatch(sendBatchRequest);
+            if (response.failed().isEmpty()) {
+                logger.log("All messages sent successfully.");
+            } else {
+                logger.log("Some messages failed to send.");
+                response.failed().forEach(f -> logger.log("Failed message ID: " + f.id()));
+                return false;
+            }
 
         } catch (Exception e) {
             final String errorMessage = "Error occurred: " + e.getMessage();
