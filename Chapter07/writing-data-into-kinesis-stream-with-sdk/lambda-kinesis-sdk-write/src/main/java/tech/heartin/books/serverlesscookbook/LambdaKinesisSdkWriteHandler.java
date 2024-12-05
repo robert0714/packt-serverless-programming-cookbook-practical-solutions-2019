@@ -1,9 +1,10 @@
 package tech.heartin.books.serverlesscookbook;
 
-import com.amazonaws.services.kinesis.AmazonKinesis;
-import com.amazonaws.services.kinesis.AmazonKinesisClientBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.kinesis.KinesisClient; 
 
 import tech.heartin.books.serverlesscookbook.domain.Request;
 import tech.heartin.books.serverlesscookbook.domain.Response;
@@ -16,11 +17,11 @@ import tech.heartin.books.serverlesscookbook.services.KinesisServiceImpl;
 public final class LambdaKinesisSdkWriteHandler implements RequestHandler<Request, Response> {
 
 
-    private final AmazonKinesis kinesisClient;
+    private final KinesisClient kinesisClient;
 
     public LambdaKinesisSdkWriteHandler() {
-        this.kinesisClient = AmazonKinesisClientBuilder.standard()
-                .withRegion(System.getenv("AWS_REGION"))
+        this.kinesisClient = KinesisClient.builder()
+                .region(Region.of(System.getenv("AWS_REGION")))
                 .build();
     }
 

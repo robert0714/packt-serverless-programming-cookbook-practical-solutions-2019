@@ -20,12 +20,10 @@
             <artifactId>aws-lambda-java-core</artifactId>
             <version>${aws.lambda.java.core.version}</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-kinesis -->
+ 
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-kinesis</artifactId>
-            <version>${aws.sdk.version}</version>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>kinesis</artifactId> 
         </dependency>
 
     </dependencies>

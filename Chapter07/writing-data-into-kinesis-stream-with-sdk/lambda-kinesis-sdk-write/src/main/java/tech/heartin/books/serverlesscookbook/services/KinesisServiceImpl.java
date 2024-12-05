@@ -6,21 +6,24 @@ import tech.heartin.books.serverlesscookbook.domain.Response;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.amazonaws.services.kinesis.AmazonKinesis;
-import com.amazonaws.services.kinesis.model.DescribeStreamResult;
-import com.amazonaws.services.kinesis.model.PutRecordsRequest;
-import com.amazonaws.services.kinesis.model.PutRecordsRequestEntry;
-import com.amazonaws.services.kinesis.model.PutRecordsResult;
+ 
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import com.amazonaws.util.StringUtils;
+
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.kinesis.KinesisClient;
+import software.amazon.awssdk.services.kinesis.model.DescribeStreamRequest;
+import software.amazon.awssdk.services.kinesis.model.DescribeStreamResponse;
+import software.amazon.awssdk.services.kinesis.model.PutRecordsRequest;
+import software.amazon.awssdk.services.kinesis.model.PutRecordsRequestEntry;
+import software.amazon.awssdk.services.kinesis.model.PutRecordsResponse;
+import software.amazon.awssdk.utils.StringUtils; 
 
 /**
  * Implementation class for KinesisService.
  */
 public class KinesisServiceImpl implements KinesisService {
 
-    private final AmazonKinesis kinesisClient;
+    private final KinesisClient  kinesisClient;
     private final List<PutRecordsRequestEntry> kinesisBatch;
     private static final String ERROR_MESSAGE = "Request completed with errors. Check Lambda logs for more details.";
     private static final String SUCCESS_MESSAGE = "Request completed without errors.";
@@ -29,7 +32,7 @@ public class KinesisServiceImpl implements KinesisService {
     private int documentAddedCount;
 
 
-    public KinesisServiceImpl(final AmazonKinesis kinesisClient) {
+    public KinesisServiceImpl(final KinesisClient kinesisClient) {
         this.kinesisClient = kinesisClient;
         this.kinesisBatch = new ArrayList<>();
     }
@@ -39,8 +42,10 @@ public class KinesisServiceImpl implements KinesisService {
 
         this.documentAddedCount = request.getCount();
 
-        DescribeStreamResult result = this.kinesisClient.describeStream(request.getStreamName());
-        logger.log("Stream Status: " + result.getStreamDescription().getStreamStatus() + ". ");
+        DescribeStreamResponse result = this.kinesisClient.describeStream(
+                DescribeStreamRequest.builder().streamName(request.getStreamName()).build()
+        );
+        logger.log("Stream Status: " + result.streamDescription().streamStatus() + ". ");
 
         logger.log("Adding records to Stream...");
 
@@ -50,9 +55,10 @@ public class KinesisServiceImpl implements KinesisService {
 
             payload = request.getPayload() + i;
 
-            this.kinesisBatch.add(new PutRecordsRequestEntry()
-                    .withPartitionKey(request.getPartitionKey())
-                    .withData(ByteBuffer.wrap(payload.getBytes())));
+            this. kinesisBatch.add(PutRecordsRequestEntry.builder()
+                    .partitionKey(request.getPartitionKey())
+                    .data(SdkBytes.fromUtf8String(payload))
+                    .build());
 
             if (this.kinesisBatch.size() >= request.getBatchSize()) {
 
@@ -77,21 +83,21 @@ public class KinesisServiceImpl implements KinesisService {
     }
 
     private void flushBatch(final String streamName, final LambdaLogger logger) {
-        final PutRecordsResult result = this.kinesisClient.putRecords(new PutRecordsRequest()
-                .withStreamName(streamName)
-                .withRecords(this.kinesisBatch));
+        final PutRecordsResponse  result = this.kinesisClient.putRecords( PutRecordsRequest.builder()
+                .streamName(streamName)
+                .records(this.kinesisBatch)
+                .build());
 
-        result.getRecords().forEach(r -> {
-            if (!(StringUtils.hasValue(r.getErrorCode()))) {
-                String successMessage = "Successfully processed record with sequence number: " + r.getSequenceNumber()
-                        + ", shard id: " + r.getShardId();
+        result.records().forEach(record -> {
+            if  (record.errorCode() == null || record.errorCode().isEmpty()) {
+                String successMessage = "Successfully processed record with sequence number: "
+                        + record.sequenceNumber() + ", shard id: " + record.shardId();
                 logger.log(successMessage);
             } else {
                 this.documentAddedCount--;
 
-                String errorMessage = "Did not process record with sequence number: " + r.getSequenceNumber()
-                        + ", error code: " + r.getErrorCode()
-                        + ", error message: " + r.getErrorMessage();
+                String errorMessage = "Did not process record with error code: " + record.errorCode()
+                        + ", error message: " + record.errorMessage();
                 logger.log(errorMessage);
                 this.isError = true;
             }
@@ -101,9 +107,9 @@ public class KinesisServiceImpl implements KinesisService {
         // You may also implement a retry logic only for failed records (e.g. Create a list for failed records,
         // add error records to that list and finally retry all failed records until a max retry count is reached.)
         /*
-        if (result.getFailedRecordCount() != null && result.getFailedRecordCount() > 0) {
-            result.getRecords().forEach(r -> {
-                if ((r != null) && (StringUtils.hasValue(r.getErrorCode()))) {
+        if (result.failedRecordCount() != null && result.failedRecordCount() > 0) {
+            result.records().forEach(r -> {
+                if ((r != null) && (StringUtils.isNotBlank(r.errorCode()))) {
                     // add this record to the retry list.
                 }
             });
