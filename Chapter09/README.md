@@ -3,7 +3,7 @@ This chapter will cover the following:
 * [Enabling **Cross-Origin Resource Sharing (CORS)** for the API and testing with CodePen](./enable-cors-for-the-api/README.md)
 * [Implementing and testing Cognito operations with the JavaScript SDK](./cognito-operations-with-javascript-sdk/README.md)
 * [Federated identity with Amazon Cognito](./federated-identity-with-amazon-cognito/README.md)
-* Creating a **Secure Sockets Layer (SSL)** certificate with **AWS Certificate Manager (ACM)**
+* [Creating a **Secure Sockets Layer (SSL)** certificate with **AWS Certificate Manager (ACM)**](./creating-ssl-tls-certificates-with-acm/README.md)
 * Fan-in and fan-out architectural patterns with AWS
 
 ## Introduction
