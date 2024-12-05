@@ -12,6 +12,8 @@ The following are the prerequisites for this recipe:
 We first need to configure the identity provider ~~(Google Plus in our case)~~ to be used for federated identity login.
 * https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-identity-federation.html
 * https://repost.aws/knowledge-center/cognito-google-social-identity-provider
+* https://docs.aws.amazon.com/cognito/latest/developerguide/google.html
+* https://docs.aws.amazon.com/cognito/latest/developerguide/authentication-flow.html
 
 ### Step 1 - Configuring The Identity Provider
 Before we can use ~~Google Plus~~ for federated identity logins with Cognito, we need to follows these steps:
