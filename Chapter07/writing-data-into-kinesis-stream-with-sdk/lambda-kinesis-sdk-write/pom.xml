@@ -25,6 +25,11 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>kinesis</artifactId> 
         </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-log4j2</artifactId>
+            <version>${aws.lambda.java.log4j2}</version>
+        </dependency>
 
     </dependencies>
 

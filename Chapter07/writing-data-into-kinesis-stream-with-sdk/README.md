@@ -24,7 +24,58 @@ You can also go through the [Your first AWS Lambda](../../Chapter01/your-first-a
 1. Run `mvn clean package` from inside the `Lambda` project root folder to create the `Uber JAR`.
 2. Upload the `Uber JAR` to S3.
 3. Create a role for the Lambda with an appropriate trust relationship definition.
+    ```bash
+    aws iam create-role \
+        --role-name lambda_kinesis_write_role \
+        --assume-role-policy-document file://iam-role-trust-relationship.txt \
+        --profile admin
+    {
+        "Role": {
+            "Path": "/",
+            "RoleName": "lambda_kinesis_write_role",
+            "RoleId": "AROA5UNKVUCP7CMQZJWYL",
+            "Arn": "arn:aws:iam::937197674655:role/lambda_kinesis_write_role",
+            "CreateDate": "2024-12-06T02:17:31+00:00",
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": "lambda.amazonaws.com"
+                        },
+                        "Action": "sts:AssumeRole"
+                    }
+                ]
+            }
+        }
+    }
+    ```
 4. Create a policy for basic logging permissions and attach it to the role.
+    ```bash
+    aws iam create-policy \
+        --policy-name lambda_iam_basic_policy \
+        --policy-document file://basic-lambda-permissions.txt \
+        --profile admin
+    {
+        "Policy": {
+            "PolicyName": "lambda_iam_basic_policy",
+            "PolicyId": "ANPA5UNKVUCPRWDP3QBCI",
+            "Arn": "arn:aws:iam::937197674655:policy/lambda_iam_basic_policy",
+            "Path": "/",
+            "DefaultVersionId": "v1",
+            "AttachmentCount": 0,
+            "PermissionsBoundaryUsageCount": 0,
+            "IsAttachable": true,
+            "CreateDate": "2024-12-06T02:19:11+00:00",
+            "UpdateDate": "2024-12-06T02:19:11+00:00"
+        }
+    }
+    aws iam attach-role-policy \
+        --role-name lambda_kinesis_write_role \
+        --policy-arn arn:aws:iam::937197674655:policy/lambda_iam_basic_policy \
+        --profile admin
+    ```
 5. Create a policy for the required Kinesis permissions and attach it to the role by going through the following steps:
     1. Create the policy document with the required Kinesis permissions using the following code:
         ```json
@@ -47,18 +98,82 @@ You can also go through the [Your first AWS Lambda](../../Chapter01/your-first-a
         ```
     2. Save the file as `lambda-kinesis-producer-permissions.txt`.
     3. Create the policy and attach it to the role.
+        ```bash
+        aws iam create-policy \
+            --policy-name lambda_kinesis_producer_policy \
+            --policy-document file://lambda-kinesis-producer-permissions.txt \
+            --profile admin
+        {
+            "Policy": {
+                "PolicyName": "lambda_kinesis_producer_policy",
+                "PolicyId": "ANPA5UNKVUCPZ2AORYVGK",
+                "Arn": "arn:aws:iam::937197674655:policy/lambda_kinesis_producer_policy",
+                "Path": "/",
+                "DefaultVersionId": "v1",
+                "AttachmentCount": 0,
+                "PermissionsBoundaryUsageCount": 0,
+                "IsAttachable": true,
+                "CreateDate": "2024-12-06T02:21:05+00:00",
+                "UpdateDate": "2024-12-06T02:21:05+00:00"
+            }
+        }
+
+        aws iam attach-role-policy \
+            --role-name lambda_kinesis_write_role \
+            --policy-arn arn:aws:iam::937197674655:policy/lambda_kinesis_producer_policy \
+            --profile admin
+        ```
 6. Create the Lambda function as follows:
     ```bash
     aws lambda create-function \
         --function-name lambda-kinesis-sdk-write \
-        --runtime java8 \
+        --runtime java17 \
         --role arn:aws:iam::<account id>:role/lambda_kinesis_write_role \
         --handler tech.heartin.books.serverlesscookbook.LambdaKinesisSdkWriteHandler::handleRequest \
-        --code S3Bucket=serverless-cookbook,S3Key=lambda-kinesis-sdk-write-0.0.1-SNAPSHOT.jar \
+        --code S3Bucket=dev-for-tw-robert-20241020,S3Key=lambda-kinesis-sdk-write-0.0.1-SNAPSHOT.jar \
         --timeout 15 \
         --memory-size 512 \
         --region us-east-1 \
         --profile admin
+        {
+            "FunctionName": "lambda-kinesis-sdk-write",
+            "FunctionArn": "arn:aws:lambda:ap-northeast-1:937197674655:function:lambda-kinesis-sdk-write",
+            "Runtime": "java17",
+            "Role": "arn:aws:iam::937197674655:role/lambda_kinesis_write_role",
+            "Handler": "tech.heartin.books.serverlesscookbook.LambdaKinesisSdkWriteHandler::handleRequest",
+            "CodeSize": 10788662,
+            "Description": "",
+            "Timeout": 15,
+            "MemorySize": 512,
+            "LastModified": "2024-12-06T02:25:24.969+0000",
+            "CodeSha256": "2Ew6xPlakTciBHHYlxqW2iSiM2lFYbgAV8memizIve0=",
+            "Version": "$LATEST",
+            "TracingConfig": {
+                "Mode": "PassThrough"
+            },
+            "RevisionId": "19046b85-b8c3-47f6-9e15-937b57b70c7c",
+            "State": "Pending",
+            "StateReason": "The function is being created.",
+            "StateReasonCode": "Creating",
+            "PackageType": "Zip",
+            "Architectures": [
+                "x86_64"
+            ],
+            "EphemeralStorage": {
+                "Size": 512
+            },
+            "SnapStart": {
+                "ApplyOn": "None",
+                "OptimizationStatus": "Off"
+            },
+            "RuntimeVersionConfig": {
+                "RuntimeVersionArn": "arn:aws:lambda:ap-northeast-1::runtime:5b9b2cfd05dd0cba22f79278aa11976651792d65fdc56d6bbda8271221739ad8"
+            },
+            "LoggingConfig": {
+                "LogFormat": "Text",
+                "LogGroup": "/aws/lambda/lambda-kinesis-sdk-write"
+            }
+        }
     ```
 7. Invoke the Lambda function as follows:
     ```bash
@@ -66,6 +181,7 @@ You can also go through the [Your first AWS Lambda](../../Chapter01/your-first-a
         --invocation-type RequestResponse \
         --function-name lambda-kinesis-sdk-write \
         --log-type Tail \
+        --cli-binary-format raw-in-base64-out \
         --payload file://resources/payload.json \
         --region us-east-1 \
         --profile admin \
@@ -85,18 +201,20 @@ You can also go through the [Your first AWS Lambda](../../Chapter01/your-first-a
 
     Verify the invocation by retrieving the messages from the stream using the following steps:
     1. First, retrieve the iterator, as shown in the following code:
-    ```bash    
-    aws kinesis get-shard-iterator \
-        --shard-id shardId-000000000000 \
-        --shard-iterator-type TRIM_HORIZON \
-        --stream-name my-first-kinesis-stream \
-        --region us-east-1 \
-        --profile admin
-    ```    
-    If successful, you should get the following message back:
-
-
-
+        ```bash    
+        aws kinesis get-shard-iterator \
+            --shard-id shardId-000000000000 \
+            --shard-iterator-type TRIM_HORIZON \
+            --stream-name my-first-kinesis-stream \
+            --region us-east-1 \
+            --profile admin
+        ```    
+        If successful, you should get the following message back:
+        ```json
+        {
+            "ShardIterator": "AAAAAAAAAAGEY3NgtcguI1U1Eo84DJQeNXt7CPVN6TjIpKuNdLnKs6j8IUAZdgzdnabo5cIlI6DjMXB/URVukh1ys+MrKny2wIIi0+/26oyu0p1HiC1VqkSjGwHt2p/EUY20CBxnrROPOiB4F7/NWQ1yJVTCe1XZLwyrwq0xCL3WZttttYKHXIei5O5ASastCW5DAt1zdjTytsmHs4jyEsdfOdEEpV1cYwR0we2xArX2YUHSOiWaHI4U282qLCISWJ87A/O7iA="
+        }
+        ```
     2. Get the records using the shard iterator, as shown in the following code:
         ```bash    
         aws kinesis get-records \
@@ -105,17 +223,92 @@ You can also go through the [Your first AWS Lambda](../../Chapter01/your-first-a
             --profile admin
         ```    
         Replace `<shard iterator>` with the shard iterator received in the previous step. This should return the following records:
-```json
-```
-        I have not shown all the records here, only the first one. At the end, you will also get the next shard iterator, as shown in the following screenshot:
-```json
+        ```bash
+        $ aws kinesis get-records --shard-iterator "AAAAAAAAAAGEY3NgtcguI1U1Eo84DJQeNXt7CPVN6TjIpKuNdLnKs6j8IUAZdgzdnabo5cIlI6DjMXB/URVukh1ys+MrKny2wIIi0+/26oyu0p1HiC1VqkSjGwHt2p/EUY20CBxnrROPOiB4F7/NWQ+1yJVTCe1XZLwyrwq0xCL3WZttttYKHXIei5O5ASastCW5DAt1zdjTytsmHs4jyEsdfOdEEpV1cYwR0we2xArX2YUHSOiWaHI4U282qLCISWJ87A/O7iA="
 
-```
+        {
+            "Records": [
+                {
+                    "SequenceNumber": "49658376332431426723430748919431374766221064337514037250",
+                    "ApproximateArrivalTimestamp": "2024-12-06T12:32:42.716000+08:00",
+                    "Data": "dGVzdHBheWxvYWRmcm9tY2xpMQ==",
+                    "PartitionKey": "12345"
+                },
+                {
+                    "SequenceNumber": "49658376332431426723430748919432583692040678966688743426",
+                    "ApproximateArrivalTimestamp": "2024-12-06T12:32:42.719000+08:00",
+                    "Data": "dGVzdHBheWxvYWRmcm9tY2xpMg==",
+                    "PartitionKey": "12345"
+                },
+                {
+                    "SequenceNumber": "49658376332431426723430748919433792617860293595863449602",
+                    "ApproximateArrivalTimestamp": "2024-12-06T12:32:42.719000+08:00",
+                    "Data": "dGVzdHBheWxvYWRmcm9tY2xpMw==",
+                    "PartitionKey": "12345"
+                },
+                {
+                    "SequenceNumber": "49658376332431426723430748919435001543679908225038155778",
+                    "ApproximateArrivalTimestamp": "2024-12-06T12:32:42.719000+08:00",
+                    "Data": "dGVzdHBheWxvYWRmcm9tY2xpNA==",
+                    "PartitionKey": "12345"
+                },
+                {
+                    "SequenceNumber": "49658376332431426723430748919436210469499522854212861954",
+                    "ApproximateArrivalTimestamp": "2024-12-06T12:32:42.719000+08:00",
+                    "Data": "dGVzdHBheWxvYWRmcm9tY2xpNQ==",
+                    "PartitionKey": "12345"
+                },
+                {
+                    "SequenceNumber": "49658376332431426723430748919457971134252586179357573122",
+                    "ApproximateArrivalTimestamp": "2024-12-06T12:32:42.778000+08:00",
+                    "Data": "dGVzdHBheWxvYWRmcm9tY2xpNg==",
+                    "PartitionKey": "12345"
+                },
+                {
+                    "SequenceNumber": "49658376332431426723430748919459180060072200808532279298",
+                    "ApproximateArrivalTimestamp": "2024-12-06T12:32:42.781000+08:00",
+                    "Data": "dGVzdHBheWxvYWRmcm9tY2xpNw==",
+                    "PartitionKey": "12345"
+                },
+                {
+                    "SequenceNumber": "49658376332431426723430748919460388985891815437706985474",
+                    "ApproximateArrivalTimestamp": "2024-12-06T12:32:42.781000+08:00",
+                    "Data": "dGVzdHBheWxvYWRmcm9tY2xpOA==",
+                    "PartitionKey": "12345"
+                },
+                {
+                    "SequenceNumber": "49658376332431426723430748919461597911711430066881691650",
+                    "ApproximateArrivalTimestamp": "2024-12-06T12:32:42.781000+08:00",
+                    "Data": "dGVzdHBheWxvYWRmcm9tY2xpOQ==",
+                    "PartitionKey": "12345"
+                },
+                {
+                    "SequenceNumber": "49658376332431426723430748919462806837531044696056397826",
+                    "ApproximateArrivalTimestamp": "2024-12-06T12:32:42.781000+08:00",
+                    "Data": "dGVzdHBheWxvYWRmcm9tY2xpMTA=",
+                    "PartitionKey": "12345"
+                }
+            ],
+            "NextShardIterator": "AAAAAAAAAAGKy0mRvEWaJvfaONcdUqcibf0V37CmFlMqlJKqnpy38r53j62huzNZuYvmDdaPKtucgBOZrwXAP/S43AUxyoCq1wI5iikbRTzDif5bfRoVG7Wpllg383nn35dAzsH1hTinvZNQ/CsiGaFV2iAR07CHWSNasJs2fff5EErqk/I4+Qr/80T2wdP2H6JSQ/OWtnug+WINXQgvIj1qZzeDnPy/vlXN1pD4xjlkC4iyGHxLB
+        ZP3l1vu44s8wF90Np/k934=",
+            "MillisBehindLatest": 0
+        }
+        ```
+        I have not shown all the records here, only the first one. At the end, you will also get the next shard iterator, as shown in the following screenshot:
+        ```json
+           ],
+            "NextShardIterator": "AAAAAAAAAAGKy0mRvEWaJvfaONcdUqcibf0V37CmFlMqlJKqnpy38r53j62huzNZuYvmDdaPKtucgBOZrwXAP/S43AUxyoCq1wI5iikbRTzDif5bfRoVG7Wpllg383nn35dAzsH1hTinvZNQ/CsiGaFV2iAR07CHWSNasJs2fff5EErqk/I4+Qr/80T2wdP2H6JSQ/OWtnug+WINXQgvIj1qZzeDnPy/vlXN1pD4xjlkC4iyGHxLB
+        ZP3l1vu44s8wF90Np/k934=",
+            "MillisBehindLatest": 0
+        }
+        ```
         You may have to call `get-records` again with the shard iterator received in this step to retrieve further records.
 
 8. Finally, you need to decode the Base64-encoded data using the following code:
-```bash
-```
+    ```bash
+    $ echo dGVzdHBheWxvYWRmcm9tY2xpMQ== |base64 --decode
+    testpayloadfromcli1
+    ```
 
 
 ## How it works...
