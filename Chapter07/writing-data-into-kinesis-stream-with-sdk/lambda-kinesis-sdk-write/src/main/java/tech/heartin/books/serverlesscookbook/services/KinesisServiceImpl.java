@@ -3,10 +3,9 @@ package tech.heartin.books.serverlesscookbook.services;
 import tech.heartin.books.serverlesscookbook.domain.Request;
 import tech.heartin.books.serverlesscookbook.domain.Response;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
- 
+
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
 import software.amazon.awssdk.core.SdkBytes;
@@ -16,7 +15,6 @@ import software.amazon.awssdk.services.kinesis.model.DescribeStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.PutRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.PutRecordsRequestEntry;
 import software.amazon.awssdk.services.kinesis.model.PutRecordsResponse;
-import software.amazon.awssdk.utils.StringUtils; 
 
 /**
  * Implementation class for KinesisService.
@@ -55,7 +53,7 @@ public class KinesisServiceImpl implements KinesisService {
 
             payload = request.getPayload() + i;
 
-            this. kinesisBatch.add(PutRecordsRequestEntry.builder()
+            this.kinesisBatch.add(PutRecordsRequestEntry.builder()
                     .partitionKey(request.getPartitionKey())
                     .data(SdkBytes.fromUtf8String(payload))
                     .build());
@@ -83,7 +81,7 @@ public class KinesisServiceImpl implements KinesisService {
     }
 
     private void flushBatch(final String streamName, final LambdaLogger logger) {
-        final PutRecordsResponse  result = this.kinesisClient.putRecords( PutRecordsRequest.builder()
+        final PutRecordsResponse  result = this.kinesisClient.putRecords(PutRecordsRequest.builder()
                 .streamName(streamName)
                 .records(this.kinesisBatch)
                 .build());

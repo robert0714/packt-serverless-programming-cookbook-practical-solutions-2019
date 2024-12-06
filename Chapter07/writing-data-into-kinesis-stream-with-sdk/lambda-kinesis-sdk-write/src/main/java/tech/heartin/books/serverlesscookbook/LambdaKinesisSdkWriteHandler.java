@@ -4,7 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.kinesis.KinesisClient; 
+import software.amazon.awssdk.services.kinesis.KinesisClient;
 
 import tech.heartin.books.serverlesscookbook.domain.Request;
 import tech.heartin.books.serverlesscookbook.domain.Response;
