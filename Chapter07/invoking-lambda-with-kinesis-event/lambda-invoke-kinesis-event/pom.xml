@@ -26,13 +26,6 @@
             <artifactId>aws-lambda-java-events</artifactId>
             <version>${aws.lambda.java.events.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-kinesis</artifactId>
-            <version>${aws.sdk.version}</version>
-        </dependency>
-
     </dependencies>
 
 </project>
