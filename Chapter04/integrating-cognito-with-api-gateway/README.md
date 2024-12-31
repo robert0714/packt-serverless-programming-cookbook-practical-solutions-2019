@@ -147,11 +147,54 @@ We will cover the steps to create an API gateway API and integrate Cognito Autho
         --client-id 45l9ureterrdqt0drbphk4q3pd \
         --auth-flow USER_PASSWORD_AUTH \
         --auth-parameters USERNAME=testuser5,PASSWORD=Passw0rd$
-    ```    
-    If it is successful, this command will return the access token, ID token, and refresh token. 
+    ```
+    or
+    calculate SECRET_HASH     
+     ```python
+     import base64
+     import hmac
+     import hashlib
+     
+     def calculate_secret_hash(client_id, client_secret, username):
+         message = username + client_id
+         dig = hmac.new(
+             client_secret.encode('utf-8'),
+             msg=message.encode('utf-8'),
+             digestmod=hashlib.sha256
+         ).digest()
+         return base64.b64encode(dig).decode()
 
-14. Finally, you can execute the URL by using a REST client, such as Postman. You need to select the authorization type as `Bearer Token` and copy the ID token value that you received in the `initiate-auth` request into the token field, as follows:
-    If it is successful, you should get the following results:
+     client_id = "45l9ureterrdqt0drbphk4q3pd"
+     client_secret = "cse7iugt57ju3bfg9739ka1j4r36kpggtqmcbv47ola129v2ath"
+     username = "testuser5"
+
+     secret_hash = calculate_secret_hash(client_id, client_secret, username)
+     print(secret_hash)	
+     ```
+
+    ```bash
+    aws cognito-idp initiate-auth \
+        --client-id 45l9ureterrdqt0drbphk4q3pd \
+        --auth-flow USER_PASSWORD_AUTH \
+        --auth-parameters '{"USERNAME":"testuser5","PASSWORD":"Passw0rd$","SECRET_HASH":"S+jqZWc4wAGGTzLN+dQ3DVp9LQ1ghIHydriwvgFkDoQ="}' USERNAME=testuser5,PASSWORD=Passw0rd$
+    ``` 
+    If it is successful, this command will return the access token, `ID token`, and refresh token. 
+    ```bash
+     {
+       "ChallengeParameters": {},
+       "AuthenticationResult": {
+          "AccessToken": "eyJraWQiOiJFQ3BSK1h3aGp3ditiMzJuVWgwTWIxT2RHYU5kS1FnQkJjN2hxT3labnY4PSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI2N2E0Y2E3OC00MGExLTcwNDYtMjA5Ny1mOGY5OTI4NTZjNjIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtbm9ydGhlYXN0LTEuYW1hem9uYXdzLmNvbVwvYXAtbm9ydGhlYXN0LTFfcjFjanNYUDU2IiwiY2xpZW50X2lkIjoiNWhuYmNlc2lybWxzaTBkMTh2dXJqcDF0YW8iLCJvcmlnaW5fanRpIjoiNzE1NTExZWUtNzAxZC00OTFiLTk4NjMtMGUwY2M2ZjRhMDI3IiwiZXZlbnRfaWQiOiI3ZjU5YTg2Yi1jMzM2LTRhOGMtOWIwMS05ODFmMzVmOTBhMDciLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNzM1NjU4MDk3LCJleHAiOjE3MzU2NjE2OTcsImlhdCI6MTczNTY1ODA5NywianRpIjoiOWQzMDIwNGMtOTEwMC00NmQzLTkwMjMtNTk1MjA5YmQ5NDE1IiwidXNlcm5hbWUiOiI2N2E0Y2E3OC00MGExLTcwNDYtMjA5Ny1mOGY5OTI4NTZjNjIifQ.N9B01BdtXhgLxtGhKA7ap3wmtRkUbQ9g2DAc2QDxDssfZgv6MaJHQ3QcMjrpEzp5_LBfnoR-zwU0fcXB1AyLVQ8oDd52Nq37zHgpWrR5e_OM4XSGJxSzmXfKFFr68DaHXloy0-S7FjVeQOzpsCp_IYAJ0Ud1T1iqPrrumK9k3FWEO0zYjFJmMrzmEDbrKJspg44Gbtu6rQhbQE99LQWd8nyJBQjYBiHcqRT8UeTJLeH51sSJnx_dMB2CAfJF1EY0HBxCNVl4RaHg3fhNeLosNAI4P7n5VOm6Xy3hVVXTisIb8edemoWXT_qcyDLQ-hTnQ9-eQrlVtyBMN6GprXHPzg",
+          "ExpiresIn": 3600,
+          "TokenType": "Bearer",
+          "RefreshToken": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.xPBBDeHnWVDKI0JEwIvFJjEtuX9oT9EMuByTn1weNkyyNZU2P5oNbUXXNyAzE9o-U0WonvTxGCHgnFON_VllDGLBg22-G75fmhz6StmIx8TytlkSWvTYwuhcoueXJoKiGECc_NeH1voVH-Lnmp1QjWQVqU5te8s1fosVc0lXoaOtMUou_nAPk_u0kVKZZ49hj4R7vEx_rorc0gbI6avXSTh33nN8znpR500YN6F3TA838LSuDzFsJotXampYCXS-6rF9hQsu_Bgu3ZidcMLN8hA9vePpyOYZwbF4_tZzaVHThPTPBf5REcLNEXpvWqkKMi9wDRliEe0ApIMgsTRquw.ml-h70nzUYEaUxc3.nFKUMSpHB9XfRRYSOhoEjOqrmGGGFb-uUaKicafzhkauFkRgHb5lC2R2lECYyMxY2zjFwnKZmxl6Sr2onu4NexCVQeI9E4XSx_ith0a0ftAfnkimBXn655J3DRWshwiXuuKpunbdDV56ov0PYkSQhkrzreP6MTHqBQx_A_kfcmBFqh4187mITHtrYvtbENnKFGTZcA5KzB9kx_2A5BHbvOy-lULGChCKvMyYbES_GY8QUJcAAQq7ofOq19Yyj_1RASpwu7AC7y9ga-xKiNr4xBviNe7TFRdMj-1RBtGAKCQygwOuIQjFLHoGil2Mb7OX0lOjMXjWOqJA-kiAFJYitL8gL7daYMlCPLesMmVEUwgBTicPUSaiRvg0CPDbGvFQkrPOOjOIb4NNpT1j6xOP7GnGbRxymCbBoFGQ5N-G_VUc8rWRKJzUfqujZqKNbVnAp9gpdNhjjQrdxHQ61u-ebk_TrF9gpej8tXBuov5FH0ZSqzwv406v9l2TmH_fhrHHuCRKGXOCLzIDGaqfLUXCEn2y21kC79JuH4ncQ6U-7xgD0nF2QfKht58YZc9x3HYzlF5aPmU73brq7VTFtxtyn9LK1LVjQsNE3PzHHQpGfrSiEkSn-HTxLd-HiDy5yH9xkJHj5n_P-F5mchlEROIIuGrMliBwqIyPmo-8LGGs6bI6bbR74ZyCK0uu24fjtSBlglRHZ5rlmjBm0rqUZHXNL3UoX4gHLpalochb2V5oMlfKPdEGZz62hDhHrp4OypPnIag1r3tF9DYAfal57V0giEOx0e9j4YE_9123O5CEbxTu3E38OFYHFpahDoRXYdygg6QyNLeyFMHpHdSb56DaQPHDDOrYJGfFJR72yE4jWKdpRvNeohlzLgEXSM1rmH4yTHKhUmHKoe78lbdEcUrrrcVDvZfA32Pb2jCs5Ei6g7GOeE14MCU_Mq1clBPzKN1DlanP7G3kjnGLhFDj9sPAzcPfWL1cZD-73Fy-j7RzFwYkS4X4vKhm4UEIv3VCgUjREHvRsQclv1BWm0w7U2Mma95kzXsZ4BPvn8P1qNHOVjg0wORh-znvl_jkYcDx6ktBcHAMb_ArXB3cqGJca8TVyFkeKII9ftQ7FmpLSUryYmBnYO8Pk4n0k7Fffx6lnnGCWwnTkU4HKIjA6CegCMNTVkwXZml8zljaY80Jezqipw21d13SgzJoEr8d-clnW4reXI-lDGW0odBydsg9-hYk2Tor913r-qELml3jpWJBa1edKtqE0rOYFFuze874LA4VDSYxWK9as_X7PcrMYFf5C7vGhzYvjYkwzDyp6FHFfWwYE9L4uA_nrPxYYiE1kswtsYfmB1YYMo41hA.NMg1s8ozfZQffGBDUmPi6g",
+          "IdToken": "eyJraWQiOiJOWWJ6K3ZvMForMzg3REFPc2FtR3pqNDBvOExsYzRZakRTSE53aDl0bXRvPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI2N2E0Y2E3OC00MGExLTcwNDYtMjA5Ny1mOGY5OTI4NTZjNjIiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtbm9ydGhlYXN0LTEuYW1hem9uYXdzLmNvbVwvYXAtbm9ydGhlYXN0LTFfcjFjanNYUDU2IiwiY29nbml0bzp1c2VybmFtZSI6IjY3YTRjYTc4LTQwYTEtNzA0Ni0yMDk3LWY4Zjk5Mjg1NmM2MiIsIm9yaWdpbl9qdGkiOiI3MTU1MTFlZS03MDFkLTQ5MWItOTg2My0wZTBjYzZmNGEwMjciLCJhdWQiOiI1aG5iY2VzaXJtbHNpMGQxOHZ1cmpwMXRhbyIsImV2ZW50X2lkIjoiN2Y1OWE4NmItYzMzNi00YThjLTliMDEtOTgxZjM1ZjkwYTA3IiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE3MzU2NTgwOTcsImV4cCI6MTczNTY2MTY5NywiaWF0IjoxNzM1NjU4MDk3LCJqdGkiOiI4MGU0MGQwMi1hMTdkLTQ4MzYtYWExOS0xYjY3NDlmYjQ3MjkiLCJlbWFpbCI6InJvYmVydC5sZWVAaWlzaWdyb3VwLmNvbSJ9.9LiSOwzbjJhCeaPqcGMZi33CIJn0I0qqVT-iSiSrSgNLB8rYmUpEbJqIqWBvgXKbmA3ep9ojSBuqT_UybulkomV1Du4mHlxEBSC8j8mLpyLi-zZ6iYdnnlmHTcNqM_lT-d0sdZDePnXvXrUJPR7T0q4H3cfwUbJclhNl10j12BRKPBL3o9UbcPzjCBJ74onwlOt_98o7cOUZijrDKhVL31lsy2T_sjqsxnfo98QIyCisjoWz4qemRSS7mTgFUQpO7Izxh-I0j1Tne4LVHfXXQg8I4hzKFpfkdPORWfBFeoyT4dC0QgdgAsRABmnojHi2sTUKjP9Dp9voGaetX-8rKg"
+       }
+    }
+
+    ```
+15. Finally, you can execute the URL by using a REST client, such as Postman. You need to select the authorization type as `Bearer Token` and copy the `ID token value` that you received in the `initiate-auth` request into the token field, as follows:
+
+     If it is successful, you should get the following results:
 
 ### The CloudFormation template
 The template starts as usual, with a template version and a description:
