@@ -176,7 +176,14 @@ We will cover the steps to create an API gateway API and integrate Cognito Autho
     aws cognito-idp initiate-auth \
         --client-id 45l9ureterrdqt0drbphk4q3pd \
         --auth-flow USER_PASSWORD_AUTH \
-        --auth-parameters '{"USERNAME":"testuser5","PASSWORD":"Passw0rd$","SECRET_HASH":"S+jqZWc4wAGGTzLN+dQ3DVp9LQ1ghIHydriwvgFkDoQ="}' USERNAME=testuser5,PASSWORD=Passw0rd$
+        --auth-parameters '{"USERNAME":"testuser5","PASSWORD":"Passw0rd$","SECRET_HASH":"S+jqZWc4wAGGTzLN+dQ3DVp9LQ1ghIHydriwvgFkDoQ="}' 
+
+     id_token=$(aws cognito-idp initiate-auth \
+        --client-id 45l9ureterrdqt0drbphk4q3pd \
+        --auth-flow USER_PASSWORD_AUTH \
+        --auth-parameters '{"USERNAME":"testuser5","PASSWORD":"Passw0rd$","SECRET_HASH":"S+jqZWc4wAGGTzLN+dQ3DVp9LQ1ghIHydriwvgFkDoQ="}' \
+       | jq ".AuthenticationResult.IdToken"  -r )
+     echo $id_token
     ``` 
     If it is successful, this command will return the access token, `ID token`, and refresh token. 
     ```bash
