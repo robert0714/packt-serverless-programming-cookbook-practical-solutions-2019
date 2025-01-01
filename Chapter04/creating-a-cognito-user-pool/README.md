@@ -72,12 +72,32 @@ In this section, we will create a user pool by using CLI commands:
         --profile admin
     ```    
     Note the `user-pool-id`, for use in future commands.
-
+    ```json
+    {
+        "UserPool": {
+           "Id": "ap-northeast-1_vk0YGvCZD",
+           "Name": "MyFirstUserPool",
+         (ommitted...)
+    ```
     We can verify `user-pool-created` by using the `describe-user-pool` sub-command:
     ```bash
     aws cognito-idp describe-user-pool \
-    --user-pool-id us-east-1_u0YJPtdpv \
+    --user-pool-id ap-northeast-1_vk0YGvCZD \
     --profile admin
+    ```
+    We can verify `user-pool-created` by using the `Token signing key URL` :
+    ```
+    https://cognito-idp.${AWS::Region}.amazonaws.com/${AWS::user-pool-id}/.well-known/jwks.json
+    
+    # examples
+    https://cognito-idp.ap-northeast-1.amazonaws.com/ap-northeast-1_vk0YGvCZD/.well-known/jwks.json
+    ```
+    We can verify `user-pool-created` by using the `Metadata endpoint URL` :
+    ```
+    https://cognito-idp.${AWS::Region}.amazonaws.com/${AWS::user-pool-id}/.well-known/openid-configuration
+
+    # examples
+    https://cognito-idp.ap-northeast-1.amazonaws.com/ap-northeast-1_vk0YGvCZD/.well-known/openid-configuration
     ```
     Remember to replace the `user-pool-id` value with our `user-pool-id` from the previous command. The `describe-user-pool` sub-command returns the current properties of the `user-pool`.
 
