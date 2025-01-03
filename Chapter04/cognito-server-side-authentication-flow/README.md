@@ -195,6 +195,9 @@ An **identity token (ID token)** is used to authenticate requests to the backend
 
 The access token is used within Cognito APIs, in order to authorize updates to the users' parameters. The Cognito API commands that accept access tokens include `associate-software-token`, `change-password`, `confirm-device`, `delete-user`, `delete-user-attributes`, `forget-device`, `get-device`, `get-user`, `get-user-attribute-verification-code`, `global-sign-out`, `list-devices`, `set-user-mfa-preference`, `set-user-settings`, `update-device-status`, `update-user-attributes`, `verify-software-token`, and `verify-user-attribute`. 
 
+   * https://docs.aws.amazon.com/zh_tw/cognito/latest/developerguide/userinfo-endpoint.html
+       *  `https://${AWS::USER_POOL_ID}.auth.${AWS::Region}.amazoncognito.com/oauth2/userInfo`
+
 The **refresh token** is used to get new identity and access tokens. For example, the `initiate auth` sub-command can specify the auth flow as `REFRESH_TOKEN_AUTH`, and can pass a refresh token to get back the access token and the ID token. We can configure the refresh token expiration (in days) when creating the user pool.
 
 ### ADMIN_NO_SRP_AUTH versus USER_PASSWORD_AUTH
