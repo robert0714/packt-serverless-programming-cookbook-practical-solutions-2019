@@ -65,7 +65,7 @@ In this section, we will create a user pool by using CLI commands:
         }
         ```
         The `AllowAdminCreateOnly` property, if set to `true`, restricts creating accounts to administrators. We will set it to `false`, as we will be doing user sign-up with this user pool in a later recipe. The complete JSON file is available in the code files.
-3. Execute the aws congnito-idp create-user-pool command, specifying this JSON file:
+3. Execute the `aws congnito-idp create-user-pool command`, specifying this JSON file:
     ```bash
     aws cognito-idp create-user-pool \
         --cli-input-json file://resources/create-user-pool-cli-input.json \
