@@ -39,7 +39,11 @@ aws cognito-idp create-user-pool-client \
 }    
 ```
 Here, I have specified `USER_PASSWORD_AUTH` as an explicit `auth` flow.
-> `ADMIN_NO_SRP_AUTH` is only supported with the admin-initiated authentication used in the server-side authentication flow. Both `ADMIN_NO_SRP_AUTH` and `USER_PASSWORD_AUTH` allow us to pass our username and password without SRP, but `USER_PASSWORD_AUTH` also supports user migration from legacy applications. 
+![pass our username and password](./resources/pics/2025-01-04_084052.png) 
+> `ADMIN_NO_SRP_AUTH` is only supported with the admin-initiated authentication used in the `server-side authentication flow`. 
+
+![pass our username and password](./resources/pics/2025-01-04_084731.png)  
+Both `ADMIN_NO_SRP_AUTH` and `USER_PASSWORD_AUTH` allow us to pass our username and password without SRP, but `USER_PASSWORD_AUTH` also supports user migration from legacy applications. 
 
 
 #### Creating a Cognito user pool client with CloudFormation template
@@ -66,7 +70,7 @@ We can also add a template format version and a description.
 We can now create the CloudFormation stack with the user pool client, by executing the `aws cloudformation create-stack` command. 
 
 ### Client-side authentication flow
-As we discussed previously, the client-side authentication flow uses non-admin APIs.
+As we discussed previously, the client-side authentication flow uses `non-admin APIs`.
 
 > The output for most of the commands will be similar to the ones that we discussed in the recipe Server-side authentication flow, and need not be repeated here. Please refer to that recipe for the screenshots. 
 
@@ -96,8 +100,8 @@ Follow the steps to demonstrate the client-side authentication flow. Remember to
         }
     }     
    ```
-   The default user status will be `FORCE_CHANGE_PASSWORD`, as we saw in the previous recipe.
-2. Initiate the authentication flow, as follows:
+   The default user status will be `FORCE_CHANGE_PASSWORD`, as we saw in [the previous recipe](../cognito-server-side-authentication-flow/README.md#server-side-authentication-flow).
+2. Initiate the authentication flow ( use `aws cognito-idp initiate-auth` ), as follows:
     ```bash
     aws cognito-idp initiate-auth \
         --client-id 4ssm8oh504j4q146ic4hogbo2s \
@@ -115,7 +119,7 @@ Follow the steps to demonstrate the client-side authentication flow. Remember to
     }   
     ```
     > As this is a non-admin API, we do not have to specify the admin profile from the command line. The `initiate auth` command will return a `NEW_PASSWORD_REQUIRED` challenge and a `session ID`.
-3. Send a response to the `auth` challenge, as follows:
+3. Send a response to the `auth` challenge(use `aws cognito-idp respond-to-auth-challenge`), as follows:
     ```bash
     aws cognito-idp respond-to-auth-challenge \
         --client-id 4ssm8oh504j4q146ic4hogbo2s \

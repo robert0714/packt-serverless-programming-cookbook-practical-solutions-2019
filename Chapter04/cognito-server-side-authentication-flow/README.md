@@ -73,7 +73,7 @@ Create the CloudFormation stack by executing the `aws cloudformation create-stac
 
 
 ### Server-side authentication flow
-The server-side authentication flow is used with admin APIs, as follows:
+The server-side authentication flow is used with `admin APIs`, as follows:
 1. Use admin APIs to create a user, as follows:
     ```bash
     aws cognito-idp admin-create-user \
@@ -101,7 +101,7 @@ The server-side authentication flow is used with admin APIs, as follows:
     }
     ``` 
     Note that the default user status is `FORCE_CHANGE_PASSWORD`. The user will be provided with a NEW_PASSWORD_REQUIRED challenge after the first login.
-2. Initiate the authentication flow as an admin, as follows:
+2. Initiate the authentication flow as an admin ( use `aws cognito-idp admin-initiate-auth` ), as follows:
     ```bash
     aws cognito-idp admin-initiate-auth \
         --user-pool-id ap-northeast-1_NbDfIkPxm \
@@ -126,7 +126,7 @@ The server-side authentication flow is used with admin APIs, as follows:
         }
     }
     ```
-3. We will then send a response to the `auth` challenge, as follows:
+3. We will then send a response to the `auth` challenge (use `aws cognito-idp admin-respond-to-auth-challenge`), as follows:
     ```bash
     aws cognito-idp admin-respond-to-auth-challenge \
         --user-pool-id ap-northeast-1_NbDfIkPxm \
