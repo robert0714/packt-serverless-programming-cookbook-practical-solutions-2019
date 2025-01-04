@@ -42,8 +42,11 @@ Use the `cognito-idp create-user-pool-client` sub-command to create a user pool 
     }
 }        
 ```    
-Here, I have specified `ADMIN_NO_SRP_AUTH` as an explicit auth flow. This will allow us to pass our username and password without SRP. Other options that are allowed include `CUSTOM_AUTH_FLOW_ONLY` and `USER_PASSWORD_AUTH`. A few other authentication flows, including `USER_SRP_AUTH` and `REFRESH_TOKEN_AUTH`, are supported by default. We will see `REFRESH_TOKEN_AUTH` within this recipe, and `USER_SRP_AUTH` within a different recipe.
+Here, I have specified `ADMIN_NO_SRP_AUTH` as an explicit auth flow. This will allow us to pass our username and password without SRP. 
+![pass our username and password](./resources/pics/2025-01-04_084052.png)  
 
+Other options that are allowed include `CUSTOM_AUTH_FLOW_ONLY` and `USER_PASSWORD_AUTH`. A few other authentication flows, including `USER_SRP_AUTH` and `REFRESH_TOKEN_AUTH`, are supported by default. We will see `REFRESH_TOKEN_AUTH` within this recipe, and `USER_SRP_AUTH` within a different recipe.
+![pass our username and password](./resources/pics/2025-01-04_084731.png)  
 
 #### Creating a Cognito user pool client with CloudFormation template
 With AWS CLI commands we had to hardcode the user pool ID, however with CloudFormation template we will reference it from the user pool CloudFormation template from the previous recipe.
@@ -201,16 +204,55 @@ The access token is used within Cognito APIs, in order to authorize updates to t
 The **refresh token** is used to get new identity and access tokens. For example, the `initiate auth` sub-command can specify the auth flow as `REFRESH_TOKEN_AUTH`, and can pass a refresh token to get back the access token and the ID token. We can configure the refresh token expiration (in days) when creating the user pool.
 
 ### ADMIN_NO_SRP_AUTH versus USER_PASSWORD_AUTH
-Cognito authentication APIs support various authentication flow types, including `ADMIN_NO_SRP_AUTH` and `USER_PASSWORD_AUTH`. Both `ADMIN_NO_SRP_AUTH` and `USER_PASSWORD_AUTH` support sending the username and the password from the client to the IDP, without SRP protocol. 
-
-`USER_PASSWORD_AUTH` also supports user migration from a legacy application, without actually requiring them to reset their passwords. However, AWS documentation suggests that we should update our auth flow type to a more secure once (for example, using SRP) after the migration is complete.
-
+Cognito authentication APIs support various authentication flow types, including `ADMIN_NO_SRP_AUTH` and `USER_PASSWORD_AUTH`. Both `ADMIN_NO_SRP_AUTH` and `USER_PASSWORD_AUTH` support sending the username and the password from the client to the IDP, without SRP protocol.   
+![other flows](./resources/pics/2025-01-04_085424.png)
+`USER_PASSWORD_AUTH` also supports user migration from a legacy application, without actually requiring them to reset their passwords. However, AWS documentation suggests that we should update our auth flow type to a more secure once (for example, using SRP) after the migration is complete.   
+![other flows](./resources/pics/2025-01-04_085724.png)
 `ADMIN_NO_SRP_AUTH` is only supported for server-side authentication using `admin-initiate-auth` and `admin-respond-to-auth-challenge`, and is not supported for client-side authentication using `initiate-auth` and `respond-to-auth-challenge`.
 
+> calculate SECRET_HASH     
+  ```python
+     import base64
+     import hmac
+     import hashlib
+     
+     def calculate_secret_hash(client_id, client_secret, username):
+         message = username + client_id
+         dig = hmac.new(
+             client_secret.encode('utf-8'),
+             msg=message.encode('utf-8'),
+             digestmod=hashlib.sha256
+         ).digest()
+         return base64.b64encode(dig).decode()
+
+     client_id = "45l9ureterrdqt0drbphk4q3pd"
+     client_secret = "cse7iugt57ju3bfg9739ka1j4r36kpggtqmcbv47ola129v2ath"
+     username = "testuser5"
+
+     secret_hash = calculate_secret_hash(client_id, client_secret, username)
+     print(secret_hash)	
+  ```
+> Using cli `aws cognito-idp initiate-auth`
+  ```bash
+  $ aws cognito-idp initiate-auth \
+        --client-id 45l9ureterrdqt0drbphk4q3pd \
+        --auth-flow USER_PASSWORD_AUTH \
+        --auth-parameters \
+        '{"USERNAME":"testuser5","PASSWORD":"Passw0rd$","SECRET_HASH":"S+jqZWc4wAGGTzLN+dQ3DVp9LQ1ghIHydriwvgFkDoQ="}' 
+
+  $ id_token=$(aws cognito-idp initiate-auth \
+        --client-id 45l9ureterrdqt0drbphk4q3pd \
+        --auth-flow USER_PASSWORD_AUTH \
+        --auth-parameters \
+        '{"USERNAME":"testuser5","PASSWORD":"Passw0rd$","SECRET_HASH":"S+jqZWc4wAGGTzLN+dQ3DVp9LQ1ghIHydriwvgFkDoQ="}' \
+       | jq ".AuthenticationResult.IdToken"  -r )
+  $ echo $id_token
+  ``` 
 ## There's more...
 In this recipe, we saw server-side authentication. There are other authentication flow use cases, including server-side authentication flow, client-side authentication flow, and custom authentication flow. We will look at some of these in later recipes. 
 
 In the real world, the admin APIs that we used for authentication in this recipe are mostly used along with SDKs, for server-side languages like Java, Node.js, and so on. We can refer to the respective SDK documentation and follow the API usages in this recipe to implement them using the SDK.
+
 
 ## See also
 * https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-authentication-flow.html
