@@ -283,7 +283,21 @@ We can also use the `describe-user-pool` sub-command, with the ID returned by th
             }
         },
         "Arn": "arn:aws:cognito-idp:ap-northeast-1:937197674655:userpool/ap-northeast-1_rXSW6qnjL",  
-    ``` 
+    ```
+    We can verify `user-pool-created` by using the `Token signing key URL` :
+    ```
+    https://cognito-idp.${AWS::Region}.amazonaws.com/${AWS::user-pool-id}/.well-known/jwks.json
+    
+    # examples
+    https://cognito-idp.ap-northeast-1.amazonaws.com/ap-northeast-1_rXSW6qnjL/.well-known/jwks.json
+    ```
+    We can verify `user-pool-created` by using the `Metadata endpoint URL` :
+    ```
+    https://cognito-idp.${AWS::Region}.amazonaws.com/${AWS::user-pool-id}/.well-known/openid-configuration
+
+    # examples
+    https://cognito-idp.ap-northeast-1.amazonaws.com/ap-northeast-1_rXSW6qnjL/.well-known/openid-configuration
+    ```
 
 10. To clean up, we can delete the user pool by deleting the stack, or keep the stack and reuse it in the next recipe.
 
